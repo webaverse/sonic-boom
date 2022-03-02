@@ -17,9 +17,9 @@ export class Electronicball extends THREE.Group {
 
         this.batchRenderer = new BatchedParticleRenderer();
 
-        const texture = new THREE.TextureLoader().load(`${baseUrl}texture1.png`);
-        const texture2 = new THREE.TextureLoader().load(`${baseUrl}texture2.png`);
-        const texture3 = new THREE.TextureLoader().load(`${baseUrl}electronic-ball2.png`);
+        const texture = new THREE.TextureLoader().load(`${baseUrl}/textures/texture1.png`);
+        const texture2 = new THREE.TextureLoader().load(`${baseUrl}/textures/texture2.png`);
+        const texture3 = new THREE.TextureLoader().load(`${baseUrl}/textures/electronic-ball2.png`);
         
         this.mainbean = new ParticleSystem(this.batchRenderer, {
             duration: 1,

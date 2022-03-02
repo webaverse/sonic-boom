@@ -13,12 +13,12 @@ export default () => {
   const {renderer, camera} = useInternals();
   let narutoRunTime=0; 
   const textureLoader = new THREE.TextureLoader()
-  const wave2 = textureLoader.load(`${baseUrl}wave2.jpeg`)
-  const wave20 = textureLoader.load(`${baseUrl}wave20.png`)
-  const wave9 = textureLoader.load(`${baseUrl}wave9.png`)
-  const textureR = textureLoader.load(`${baseUrl}r.jpg`);
-  const textureG = textureLoader.load(`${baseUrl}g.jpg`);
-  const textureB = textureLoader.load(`${baseUrl}b.jpg`);
+  const wave2 = textureLoader.load(`${baseUrl}/textures/wave2.jpeg`)
+  const wave20 = textureLoader.load(`${baseUrl}/textures/wave20.png`)
+  const wave9 = textureLoader.load(`${baseUrl}/textures/wave9.png`)
+  const textureR = textureLoader.load(`${baseUrl}/textures/r.jpg`);
+  const textureG = textureLoader.load(`${baseUrl}/textures/g.jpg`);
+  const textureB = textureLoader.load(`${baseUrl}/textures/b.jpg`);
     //################################################ trace narutoRun Time ########################################
     {
         useFrame(() => {
@@ -1729,7 +1729,7 @@ export default () => {
     let wave;
     let group = new THREE.Group();
     (async () => {
-        const u = `${baseUrl}wave3.glb`;
+        const u = `${baseUrl}/assets/wave3.glb`;
         wave = await new Promise((accept, reject) => {
             const {gltfLoader} = useLoaders();
             gltfLoader.load(u, accept, function onprogress() {}, reject);
