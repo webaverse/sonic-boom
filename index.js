@@ -1,7 +1,6 @@
 import * as THREE from 'three';
 
 import metaversefile from 'metaversefile';
-import ioManager from '../../io-manager';
 const {useApp, useFrame, useLocalPlayer, useCameraManager, useLoaders, useInternals} = metaversefile;
 const baseUrl = import.meta.url.replace(/(\/)[^\/\\]*$/, '$1');
 import { Electronicball } from './electronicball';
