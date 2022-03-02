@@ -3,7 +3,7 @@ import * as THREE from 'three';
 import metaversefile from 'metaversefile';
 const {useApp, useFrame, useLocalPlayer, useCameraManager, useLoaders, useInternals} = metaversefile;
 const baseUrl = import.meta.url.replace(/(\/)[^\/\\]*$/, '$1');
-import { Electronicball } from './electronicball';
+import { Electronicball } from './electronicball.js';
 
 
 export default () => {
@@ -704,6 +704,7 @@ export default () => {
             else{
                 playerRotation.push(-localPlayer.rotation.y);
             }
+
             if(playerRotation.length>=50){
                 lightningMaterial.uniforms.playerRotation.value=new THREE.Vector3( playerRotation[playerRotation.length-1],playerRotation[playerRotation.length-1],playerRotation[playerRotation.length-5]);
             }
