@@ -6,7 +6,7 @@ import {
     BatchedParticleRenderer, ColorOverLife, ParticleSystem, PointEmitter, RenderMode,
     ConstantValue, ConstantColor, SphereEmitter, SizeOverLife, PiecewiseBezier, Bezier, ColorRange,
     IntervalValue, RandomColor, ConeEmitter, FrameOverLife, RotationOverLife, Gradient
-} from './three.quarks.esm';
+} from './three.quarks.esm.js';
 const baseUrl = import.meta.url.replace(/(\/)[^\/\\]*$/, '$1');
 
 export class Electronicball extends THREE.Group {
