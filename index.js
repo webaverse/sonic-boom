@@ -220,11 +220,11 @@ export default () => {
       
     
         let frontwave=new THREE.Mesh(geometry,material);
-        frontwave.position.y=1;
+        frontwave.position.y=0;
         frontwave.setRotationFromAxisAngle( new THREE.Vector3( 1, 0, 0 ), -90 * Math.PI / 180 );
         
         let frontwave2=new THREE.Mesh(geometry,material2);
-        frontwave2.position.y=1;
+        frontwave2.position.y=0;
         frontwave2.setRotationFromAxisAngle( new THREE.Vector3( 1, 0, 0 ), -90 * Math.PI / 180 );
         
         const group = new THREE.Group();
@@ -234,7 +234,10 @@ export default () => {
         
         useFrame(({timestamp}) => {
             group.position.copy(localPlayer.position);
-            group.position.y-=1.5;
+            if (localPlayer.avatar) {
+                group.position.y -= localPlayer.avatar.height;
+                group.position.y += 0.65;
+            }
             group.rotation.copy(localPlayer.rotation);
             
             let dum = new THREE.Vector3();
@@ -349,7 +352,10 @@ export default () => {
 
         useFrame(({timestamp}) => {
             group.position.copy(localPlayer.position);
-            group.position.y-=0.5;
+            if (localPlayer.avatar) {
+                group.position.y -= localPlayer.avatar.height;
+                group.position.y += 0.65;
+            }
             group.rotation.copy(localPlayer.rotation);
 
             let dum = new THREE.Vector3();
@@ -488,7 +494,10 @@ export default () => {
        
         useFrame(({timestamp}) => {
             group.position.copy(localPlayer.position);
-            group.position.y-=0.55;
+            if (localPlayer.avatar) {
+                group.position.y -= localPlayer.avatar.height;
+                group.position.y += 0.65;
+            }
             //group.rotation.copy(localPlayer.rotation);
             //console.log(localPlayer.rotation.x);
             let dum = new THREE.Vector3();
@@ -668,7 +677,10 @@ export default () => {
         let lightningfreq=0;
         useFrame(({timestamp}) => {
             group.position.copy(localPlayer.position);
-            group.position.y-=0.55;
+            if (localPlayer.avatar) {
+                group.position.y -= localPlayer.avatar.height;
+                group.position.y += 0.65;
+            }
             //group.rotation.copy(localPlayer.rotation);
             //console.log(localPlayer.rotation.x);
             let dum = new THREE.Vector3();
@@ -704,7 +716,6 @@ export default () => {
             else{
                 playerRotation.push(-localPlayer.rotation.y);
             }
-
             if(playerRotation.length>=50){
                 lightningMaterial.uniforms.playerRotation.value=new THREE.Vector3( playerRotation[playerRotation.length-1],playerRotation[playerRotation.length-1],playerRotation[playerRotation.length-5]);
             }
@@ -865,10 +876,17 @@ export default () => {
         tempPosition[0] = localPlayer.position.x;
         tempPosition[1] = localPlayer.position.y-1.;
         tempPosition[2] = localPlayer.position.z;
-    
+        if (localPlayer.avatar) {
+            tempPosition[1] -= localPlayer.avatar.height;
+            tempPosition[1] += 1.18;
+        }
         tempPosition[3] = localPlayer.position.x;
         tempPosition[4] = localPlayer.position.y-2.;
         tempPosition[5] = localPlayer.position.z;
+        if (localPlayer.avatar) {
+            tempPosition[4] -= localPlayer.avatar.height;
+            tempPosition[4] += 1.18;
+        }
     
         tempPosition[6] = position[0];
         tempPosition[7] = position[1];
@@ -885,6 +903,10 @@ export default () => {
         tempPosition[15] = localPlayer.position.x;
         tempPosition[16] = localPlayer.position.y-2.;
         tempPosition[17] = localPlayer.position.z;
+        if (localPlayer.avatar) {
+            tempPosition[16] -= localPlayer.avatar.height;
+            tempPosition[16] += 1.18;
+        }
     
         for (let i = 0; i < position.length; i++) {
             tempPosition[i + 18] = position[i];
@@ -1147,10 +1169,17 @@ export default () => {
         tempPosition[0] = point1.position.x;
         tempPosition[1] = localPlayer.position.y-1.55;
         tempPosition[2] = point1.position.z;
-    
+        if (localPlayer.avatar) {
+            tempPosition[1] -= localPlayer.avatar.height;
+            tempPosition[1] += 1.18;
+        }
         tempPosition[3] = point2.position.x;
         tempPosition[4] = localPlayer.position.y-1.55;
         tempPosition[5] = point2.position.z;
+        if (localPlayer.avatar) {
+            tempPosition[4] -= localPlayer.avatar.height;
+            tempPosition[4] += 1.18;
+        }
     
         tempPosition[6] = position[0];
         tempPosition[7] = position[1];
@@ -1167,6 +1196,10 @@ export default () => {
         tempPosition[15] = point2.position.x;
         tempPosition[16] = localPlayer.position.y-1.55;
         tempPosition[17] = point2.position.z;
+        if (localPlayer.avatar) {
+            tempPosition[16] -= localPlayer.avatar.height;
+            tempPosition[16] += 1.18;
+        }
         
     
         for (let i = 0; i < position.length; i++) {
@@ -1542,7 +1575,10 @@ export default () => {
             
             
             if(!localPlayer.hasAction('fly') && !localPlayer.hasAction('jump')){
-                electronicball.position.y-=0.6;
+                if (localPlayer.avatar) {
+                    electronicball.position.y -= localPlayer.avatar.height;
+                    electronicball.position.y += 0.65;
+                }
             }
             else{
                 electronicball.position.y-=50000;
