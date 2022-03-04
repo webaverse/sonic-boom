@@ -1546,8 +1546,7 @@ export default () => {
     //########################################### electronic ball #############################################
     
     {
-        let electronicball;
-        electronicball = new Electronicball();
+        const electronicball = new Electronicball();
         app.add(electronicball);
         app.add(electronicball.batchRenderer);
         app.updateMatrixWorld();
