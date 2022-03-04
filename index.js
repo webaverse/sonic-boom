@@ -25,7 +25,7 @@ export default () => {
             
             //console.log(camera.rotation.y-localPlayer.rotation.y);
             //console.log(localPlayer.actionInterpolants.jump)
-            if (localPlayer.hasAction('narutoRun') && !localPlayer.hasAction('fly') && !localPlayer.hasAction('jump')){
+            if (localPlayer.hasAction('narutoRun')){
                     narutoRunTime++;
                     
                 }
