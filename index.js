@@ -231,6 +231,8 @@ export default () => {
         group.add(frontwave);
         group.add(frontwave2);
         app.add(group);
+
+        const localVector = new THREE.Vector3();
         
         useFrame(({timestamp}) => {
             group.position.copy(localPlayer.position);
@@ -240,11 +242,10 @@ export default () => {
             }
             group.rotation.copy(localPlayer.rotation);
             
-            let dum = new THREE.Vector3();
-            localPlayer.getWorldDirection(dum)
-            dum = dum.normalize();
-            group.position.x+=0.6*dum.x;
-            group.position.z+=0.6*dum.z;
+            localPlayer.getWorldDirection(localVector)
+            localVector.normalize();
+            group.position.x+=0.6*localVector.x;
+            group.position.z+=0.6*localVector.z;
         
             if(narutoRunTime>10){
                 group.scale.set(1,1,1);
@@ -337,7 +338,7 @@ export default () => {
                 blending: THREE.AdditiveBlending,
                 side: THREE.DoubleSide
             });
-            const material = new THREE.MeshBasicMaterial( {color: 0x00ff00} );
+            // const material = new THREE.MeshBasicMaterial( {color: 0x00ff00} );
             const mesh = new THREE.Mesh(geometry, windMaterial);
             mesh.setRotationFromAxisAngle( new THREE.Vector3( 1, 0, 0 ), -90 * Math.PI / 180 );
             
@@ -348,7 +349,7 @@ export default () => {
         }
         windEffect();
         
-        
+        const localVector = new THREE.Vector3();
 
         useFrame(({timestamp}) => {
             group.position.copy(localPlayer.position);
@@ -358,11 +359,10 @@ export default () => {
             }
             group.rotation.copy(localPlayer.rotation);
 
-            let dum = new THREE.Vector3();
-            localPlayer.getWorldDirection(dum)
-            dum = dum.normalize();
-            group.position.x+=2.2*dum.x;
-            group.position.z+=2.2*dum.z;
+            localPlayer.getWorldDirection(localVector);
+            localVector.normalize();
+            group.position.x+=2.2*localVector.x;
+            group.position.z+=2.2*localVector.z;
             if(narutoRunTime>10){
                 group.scale.set(1,1,1);
                 
@@ -491,6 +491,7 @@ export default () => {
         flame();
         
         let playerRotation=[];
+        const localVector = new THREE.Vector3();
        
         useFrame(({timestamp}) => {
             group.position.copy(localPlayer.position);
@@ -500,11 +501,10 @@ export default () => {
             }
             //group.rotation.copy(localPlayer.rotation);
             //console.log(localPlayer.rotation.x);
-            let dum = new THREE.Vector3();
-            localPlayer.getWorldDirection(dum)
-            dum = dum.normalize();
-            group.position.x+=2.2*dum.x;
-            group.position.z+=2.2*dum.z;
+            localPlayer.getWorldDirection(localVector)
+            localVector.normalize();
+            group.position.x+=2.2*localVector.x;
+            group.position.z+=2.2*localVector.z;
 
             if(narutoRunTime>10 ){
                 group.scale.set(1,1,1);
@@ -534,7 +534,7 @@ export default () => {
                 playerRotation.push(-localPlayer.rotation.y);
             }
             if(playerRotation.length>=50){
-                flameMaterial.uniforms.playerRotation.value=new THREE.Vector3( playerRotation[playerRotation.length-1],playerRotation[playerRotation.length-1],playerRotation[playerRotation.length-5]);
+                flameMaterial.uniforms.playerRotation.value.set( playerRotation[playerRotation.length-1],playerRotation[playerRotation.length-1],playerRotation[playerRotation.length-5]);
             }
             app.updateMatrixWorld();
 
@@ -675,6 +675,8 @@ export default () => {
         
         let playerRotation=[];
         let lightningfreq=0;
+        const localVector = new THREE.Vector3();
+
         useFrame(({timestamp}) => {
             group.position.copy(localPlayer.position);
             if (localPlayer.avatar) {
@@ -683,11 +685,10 @@ export default () => {
             }
             //group.rotation.copy(localPlayer.rotation);
             //console.log(localPlayer.rotation.x);
-            let dum = new THREE.Vector3();
-            localPlayer.getWorldDirection(dum)
-            dum = dum.normalize();
-            group.position.x+=2.2*dum.x;
-            group.position.z+=2.2*dum.z;
+            localPlayer.getWorldDirection(localVector);
+            localVector.normalize();
+            group.position.x+=2.2*localVector.x;
+            group.position.z+=2.2*localVector.z;
 
             if(narutoRunTime>10 ){
                 group.scale.set(1,1,1);
@@ -717,7 +718,7 @@ export default () => {
                 playerRotation.push(-localPlayer.rotation.y);
             }
             if(playerRotation.length>=50){
-                lightningMaterial.uniforms.playerRotation.value=new THREE.Vector3( playerRotation[playerRotation.length-1],playerRotation[playerRotation.length-1],playerRotation[playerRotation.length-5]);
+                lightningMaterial.uniforms.playerRotation.value.set( playerRotation[playerRotation.length-1],playerRotation[playerRotation.length-1],playerRotation[playerRotation.length-5]);
             }
             if(lightningfreq%1==0){
                 lightningMaterial.uniforms.random.value=Math.random()*Math.PI;
@@ -1085,6 +1086,8 @@ export default () => {
       app.add( point1 );
       const point2 = new THREE.Mesh( geometryp, materialp );
       app.add( point2 );
+
+      const localVector = new THREE.Vector3();
    
       useFrame(({timestamp}) => {
         
@@ -1095,11 +1098,10 @@ export default () => {
             point1.rotation.y+=Math.PI/2;
             
             
-            let dum = new THREE.Vector3();
-            point1.getWorldDirection(dum)
-            dum = dum.normalize();
-            point1.position.x+=0.6*dum.x;
-            point1.position.z+=0.6*dum.z;
+            point1.getWorldDirection(localVector);
+            localVector.normalize();
+            point1.position.x+=0.6*localVector.x;
+            point1.position.z+=0.6*localVector.z;
     
     
             point2.position.copy(localPlayer.position);
@@ -1109,11 +1111,10 @@ export default () => {
             point2.rotation.y-=Math.PI/2;
             
             
-            dum = new THREE.Vector3();
-            point2.getWorldDirection(dum)
-            dum = dum.normalize();
-            point2.position.x+=0.6*dum.x;
-            point2.position.z+=0.6*dum.z;
+            point2.getWorldDirection(localVector)
+            localVector.normalize();
+            point2.position.x+=0.6*localVector.x;
+            point2.position.z+=0.6*localVector.z;
        }
        else{
             point1.position.copy(localPlayer.position);
@@ -1122,11 +1123,10 @@ export default () => {
             point1.rotation.y-=Math.PI/2;
             
             
-            let dum = new THREE.Vector3();
-            point1.getWorldDirection(dum)
-            dum = dum.normalize();
-            point1.position.x+=0.6*dum.x;
-            point1.position.z+=0.6*dum.z;
+            point1.getWorldDirection(localVector)
+            localVector.normalize();
+            point1.position.x+=0.6*localVector.x;
+            point1.position.z+=0.6*localVector.z;
     
     
             point2.position.copy(localPlayer.position);
@@ -1136,11 +1136,10 @@ export default () => {
             point2.rotation.y+=Math.PI/2;
             
             
-            dum = new THREE.Vector3();
-            point2.getWorldDirection(dum)
-            dum = dum.normalize();
-            point2.position.x+=0.6*dum.x;
-            point2.position.z+=0.6*dum.z;
+            point2.getWorldDirection(localVector)
+            localVector.normalize();
+            point2.position.x+=0.6*localVector.x;
+            point2.position.z+=0.6*localVector.z;
        }
         
         
@@ -1556,6 +1555,9 @@ export default () => {
         const startTime = Date.now();
         let lastTimestamp = startTime;
         electronicball.update(0,-1);
+
+        const localVector = new THREE.Vector3();
+
         useFrame(({timestamp}) => {
             
             const now = Date.now();
@@ -1565,12 +1567,11 @@ export default () => {
 
             
             electronicball.position.copy(localPlayer.position);
-            let dum = new THREE.Vector3();
-            localPlayer.getWorldDirection(dum)
-            dum = dum.normalize();
+            localPlayer.getWorldDirection(localVector)
+            localVector.normalize();
             //console.log(dum);
-            electronicball.position.x-=1.2*dum.x;
-            electronicball.position.z-=1.2*dum.z;
+            electronicball.position.x-=1.2*localVector.x;
+            electronicball.position.z-=1.2*localVector.z;
             
             
             
@@ -1586,8 +1587,8 @@ export default () => {
             if(narutoRunTime==0){
                 electronicball.update(timeDiff,0);
                 
-                electronicball.position.x+=1.2*dum.x;
-                electronicball.position.z+=1.2*dum.z;
+                electronicball.position.x+=1.2*localVector.x;
+                electronicball.position.z+=1.2*localVector.z;
             }
             else if(narutoRunTime==1){
                 electronicball.update(timeDiff,10);
@@ -1760,8 +1761,10 @@ export default () => {
   {
     const localVector = new THREE.Vector3();
     const _shake = () => {
-        localVector.setFromMatrixPosition(localPlayer.matrixWorld);
-        cameraManager.addShake( localVector, 0.5, 10, 50);
+        if (narutoRunTime === 1) {
+            localVector.setFromMatrixPosition(localPlayer.matrixWorld);
+            cameraManager.addShake( localVector, 0.2, 30, 500);
+        }
     };
     let wave;
     let group = new THREE.Group();
@@ -1875,17 +1878,14 @@ export default () => {
 
     })();
 
-
-    
     app.updateMatrixWorld();
 
     useFrame(({timestamp}) => {
-        let dum = new THREE.Vector3();
-        localPlayer.getWorldDirection(dum)
-        dum = dum.normalize();
+        /* localPlayer.getWorldDirection(localVector)
+        localVector.normalize(); */
 
-        if(wave){
-            if(narutoRunTime>0){
+        if (wave) {
+            if (narutoRunTime > 0) {
                 // if(wave.scene.scale.x>5){
                 //     // wave.scene.scale.set(10,10,10);
                 //     // wave.scene.position.y=-5000;
@@ -1893,11 +1893,10 @@ export default () => {
                 // else{
                     wave.scene.scale.set(wave.scene.scale.x+.1,wave.scene.scale.y+0.0005,wave.scene.scale.z+.1);
                     group.position.copy(localPlayer.position);
-                    let dum = new THREE.Vector3();
-                    localPlayer.getWorldDirection(dum)
-                    dum = dum.normalize();
-                    group.position.x-=0.2*dum.x;
-                    group.position.z-=0.2*dum.z;
+                    localPlayer.getWorldDirection(localVector);
+                    localVector.normalize();
+                    group.position.x-=0.2*localVector.x;
+                    group.position.z-=0.2*localVector.z;
                     group.rotation.copy(localPlayer.rotation);
                     wave.scene.position.y=-1.;
                     if(wave.scene.scale.x<=5){
