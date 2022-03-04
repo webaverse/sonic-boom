@@ -517,12 +517,12 @@ export default () => {
             // if(narutoRunTime>0 && narutoRunTime<90){
             //     group.scale.set(0,0,0);
             // }
-            if(!localPlayer.hasAction('fly') && !localPlayer.hasAction('jump')){
+            // if(!localPlayer.hasAction('fly') && !localPlayer.hasAction('jump')){
                 group.scale.set(1,1,1);
-            }
+            /* }
             else{
                 group.scale.set(0,0,0);
-            }
+            } */
             
             flameMaterial.uniforms.uTime.value=timestamp/20000;
             
@@ -701,12 +701,12 @@ export default () => {
             // if(narutoRunTime>0 && narutoRunTime<90){
             //     group.scale.set(0,0,0);
             // }
-            if(!localPlayer.hasAction('fly') && !localPlayer.hasAction('jump')){
+            // if(!localPlayer.hasAction('fly') && !localPlayer.hasAction('jump')){
                 group.scale.set(1,1,1);
-            }
+            /* }
             else{
                 group.scale.set(0,0,0);
-            }
+            } */
             
             lightningMaterial.uniforms.uTime.value=timestamp/20000;
             
@@ -1575,15 +1575,15 @@ export default () => {
             
             
             
-            if(!localPlayer.hasAction('fly') && !localPlayer.hasAction('jump')){
+            // if(!localPlayer.hasAction('fly') && !localPlayer.hasAction('jump')){
                 if (localPlayer.avatar) {
                     electronicball.position.y -= localPlayer.avatar.height;
                     electronicball.position.y += 0.65;
                 }
-            }
+            /* }
             else{
                 electronicball.position.y-=50000;
-            }
+            } */
             if(narutoRunTime==0){
                 electronicball.update(timeDiff,0);
                 
