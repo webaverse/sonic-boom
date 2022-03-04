@@ -222,151 +222,170 @@ export class Electronicball extends THREE.Group {
         this.particle.update(delta*1000);
         //this.chargeParticle.update(delta);
         //console.log(this.mainbean.startColor);
-        if(chargeSw==-1){
 
-            // this.chargeParticle.startSize.a=0.075;
-            // this.chargeParticle.startSize.b=0.125;
+        switch (chargeSw) {
+            case Electronicball.UPDATES.INIT: {
 
-            this.particle.startSize.a=0;
-            this.particle.startSize.b=0;
+                // this.chargeParticle.startSize.a=0.075;
+                // this.chargeParticle.startSize.b=0.125;
 
-            this.mainbean.startSpeed.value=0;
+                this.particle.startSize.a=0;
+                this.particle.startSize.b=0;
 
-            this.mainbean.startSize.value=0;
-            this.glowbeam.startSize.value=0;
-            this.electricity.startSize.a=0;
-            this.electricity.startSize.b=0;
-            this.electricBall.startSize.a=0;
-            this.electricBall.startSize.b=0;
+                this.mainbean.startSpeed.value=0;
 
-            this.mainbean.startColor.color.w=0;
-            this.glowbeam.startColor.color.w=0;
+                this.mainbean.startSize.value=0;
+                this.glowbeam.startSize.value=0;
+                this.electricity.startSize.a=0;
+                this.electricity.startSize.b=0;
+                this.electricBall.startSize.a=0;
+                this.electricBall.startSize.b=0;
 
-            // this.electricity.emissionOverTime.a=5;
-            // this.electricity.emissionOverTime.b=10;
-            // this.electricBall.emissionOverTime.value=3;
-            
-        }
-        if(chargeSw==0){
+                this.mainbean.startColor.color.w=0;
+                this.glowbeam.startColor.color.w=0;
 
-            // this.chargeParticle.startSize.a=0;
-            // this.chargeParticle.startSize.b=0;
+                // this.electricity.emissionOverTime.a=5;
+                // this.electricity.emissionOverTime.b=10;
+                // this.electricBall.emissionOverTime.value=3;
+                
+                break;
+            }
+            case Electronicball.UPDATES.FIRST: {
 
-            this.particle.startSize.a=0;
-            this.particle.startSize.b=0;
+                // this.chargeParticle.startSize.a=0;
+                // this.chargeParticle.startSize.b=0;
 
-            
+                this.particle.startSize.a=0;
+                this.particle.startSize.b=0;
 
-            // this.mainbean.startSize.value/=1.018;
-            // this.glowbeam.startSize.value/=1.018;
-            this.electricity.startSize.a/=1.05;
-            this.electricity.startSize.b/=1.05;
-            this.electricBall.startSize.a/=1.05;
-            this.electricBall.startSize.b/=1.05;
+                
 
-            this.mainbean.startSpeed.value+=this.mainbean.startSize.value/100.;
-
-            this.mainbean.startColor.color.w/=1.05;
-            this.glowbeam.startColor.color.w/=1.05;
-            
-            // this.electricity.emissionOverTime.a=1;
-            // this.electricity.emissionOverTime.b=2;
-            // this.electricBall.emissionOverTime.value=.1;
-        }
-        //############ initial ###################
-        if(chargeSw==10){
-
-            // this.chargeParticle.startSize.a=0.075;
-            // this.chargeParticle.startSize.b=0.125;
-
-            this.particle.startSize.a=0.1;
-            this.particle.startSize.b=0.15;
-
-            this.mainbean.startSpeed.value=0;
-
-            this.mainbean.startSize.value=0.75*1.5;
-            this.glowbeam.startSize.value=1.5*1.5;
-            this.electricity.startSize.a=.3*3;
-            this.electricity.startSize.b=.6*3;
-            this.electricBall.startSize.a=1*1.5;
-            this.electricBall.startSize.b=1.5*1.5;
-
-            this.mainbean.startColor.color.w=0.772549;
-            this.glowbeam.startColor.color.w=0.772549;
-
-            // this.electricity.emissionOverTime.a=5;
-            // this.electricity.emissionOverTime.b=10;
-            // this.electricBall.emissionOverTime.value=3;
-            
-        }
-        if(chargeSw==1){
-            
-            // this.chargeParticle.startSize.a=0.075;
-            // this.chargeParticle.startSize.b=0.125;
-
-            this.particle.startSize.a=0.;
-            this.particle.startSize.b=0.;
-
-            this.mainbean.startSize.value/=1.01;
-            this.glowbeam.startSize.value/=1.01;
-            this.electricity.startSize.a/=1.01;
-            this.electricity.startSize.b/=1.01;
-            this.electricBall.startSize.a/=1.01;
-            this.electricBall.startSize.b/=1.01;
-            
-        }
-        else if(chargeSw==2){
-           
-            // this.chargeParticle.startSize.a=0;
-            // this.chargeParticle.startSize.b=0;
-
-
-            this.mainbean.startSize.value=0.75*4.5;
-            this.glowbeam.startSize.value=1.5*4.5;
-            this.electricity.startSize.a=.3*9;
-            this.electricity.startSize.b=.6*9;
-            this.electricBall.startSize.a=1*4.5;
-            this.electricBall.startSize.b=1.5*4.5;
-        }
-        else if(chargeSw==3){
-           
-            // this.chargeParticle.startSize.a=0;
-            // this.chargeParticle.startSize.b=0;
-
-            this.particle.startSize.a=0.1;
-            this.particle.startSize.b=0.15;
-            if(this.mainbean.startSize.value>0.75*1.5)
-                this.mainbean.startSize.value/=1.05;
-            else
-                this.mainbean.startSize.value=0.75*1.5;
-
-            if(this.glowbeam.startSize.value>1.5*1.5)
-                this.glowbeam.startSize.value/=1.05;
-            else
-                this.glowbeam.startSize.value=1.5*1.5;
-
-            if(this.electricity.startSize.a>.3*3)
+                // this.mainbean.startSize.value/=1.018;
+                // this.glowbeam.startSize.value/=1.018;
                 this.electricity.startSize.a/=1.05;
-            else
-                this.electricity.startSize.a=.3*3;
-            if(this.electricity.startSize.b>.6*3)
                 this.electricity.startSize.b/=1.05;
-            else
-                this.electricity.startSize.b=.6*3;
-
-            if(this.electricBall.startSize.a>1*1.5)
                 this.electricBall.startSize.a/=1.05;
-            else
-                this.electricBall.startSize.a=1*1.5;
-            if(this.electricBall.startSize.b>1.5*1.5)
                 this.electricBall.startSize.b/=1.05;
-            else
+
+                this.mainbean.startSpeed.value+=this.mainbean.startSize.value/100.;
+
+                this.mainbean.startColor.color.w/=1.05;
+                this.glowbeam.startColor.color.w/=1.05;
+                
+                // this.electricity.emissionOverTime.a=1;
+                // this.electricity.emissionOverTime.b=2;
+                // this.electricBall.emissionOverTime.value=.1;
+
+                break;
+            }
+
+            //############ initial ###################
+            case Electronicball.UPDATES.SECOND: {
+
+                // this.chargeParticle.startSize.a=0.075;
+                // this.chargeParticle.startSize.b=0.125;
+
+                this.particle.startSize.a=0.1;
+                this.particle.startSize.b=0.15;
+
+                this.mainbean.startSpeed.value=0;
+
+                this.mainbean.startSize.value=0.75*1.5;
+                this.glowbeam.startSize.value=1.5*1.5;
+                this.electricity.startSize.a=.3*3;
+                this.electricity.startSize.b=.6*3;
+                this.electricBall.startSize.a=1*1.5;
                 this.electricBall.startSize.b=1.5*1.5;
-        }
+
+                this.mainbean.startColor.color.w=0.772549;
+                this.glowbeam.startColor.color.w=0.772549;
+
+                // this.electricity.emissionOverTime.a=5;
+                // this.electricity.emissionOverTime.b=10;
+                // this.electricBall.emissionOverTime.value=3;
+
+                break;
+            }
+            /* case DEADCODE: {
             
-        
+                // this.chargeParticle.startSize.a=0.075;
+                // this.chargeParticle.startSize.b=0.125;
+
+                this.particle.startSize.a=0.;
+                this.particle.startSize.b=0.;
+
+                this.mainbean.startSize.value/=1.01;
+                this.glowbeam.startSize.value/=1.01;
+                this.electricity.startSize.a/=1.01;
+                this.electricity.startSize.b/=1.01;
+                this.electricBall.startSize.a/=1.01;
+                this.electricBall.startSize.b/=1.01;
+
+                break;
+            } */
+            case Electronicball.UPDATES.EARLY: {
+                // this.chargeParticle.startSize.a=0;
+                // this.chargeParticle.startSize.b=0;
+
+
+                this.mainbean.startSize.value=0.75*4.5;
+                this.glowbeam.startSize.value=1.5*4.5;
+                this.electricity.startSize.a=.3*9;
+                this.electricity.startSize.b=.6*9;
+                this.electricBall.startSize.a=1*4.5;
+                this.electricBall.startSize.b=1.5*4.5;
+                
+                break;
+            }
+            case Electronicball.UPDATES.LATE: {
+            // this.chargeParticle.startSize.a=0;
+            // this.chargeParticle.startSize.b=0;
+
+                this.particle.startSize.a=0.1;
+                this.particle.startSize.b=0.15;
+                if(this.mainbean.startSize.value>0.75*1.5)
+                    this.mainbean.startSize.value/=1.05;
+                else
+                    this.mainbean.startSize.value=0.75*1.5;
+
+                if(this.glowbeam.startSize.value>1.5*1.5)
+                    this.glowbeam.startSize.value/=1.05;
+                else
+                    this.glowbeam.startSize.value=1.5*1.5;
+
+                if(this.electricity.startSize.a>.3*3)
+                    this.electricity.startSize.a/=1.05;
+                else
+                    this.electricity.startSize.a=.3*3;
+                if(this.electricity.startSize.b>.6*3)
+                    this.electricity.startSize.b/=1.05;
+                else
+                    this.electricity.startSize.b=.6*3;
+
+                if(this.electricBall.startSize.a>1*1.5)
+                    this.electricBall.startSize.a/=1.05;
+                else
+                    this.electricBall.startSize.a=1*1.5;
+                if(this.electricBall.startSize.b>1.5*1.5)
+                    this.electricBall.startSize.b/=1.05;
+                else
+                    this.electricBall.startSize.b=1.5*1.5;
+                break;
+            }
+            default: {
+              throw new Error('Invalid update type');
+            }
+        }
 
         this.batchRenderer.update();
     }
+
+    static UPDATES = {
+        INIT: Symbol(),
+        FIRST: Symbol(),
+        SECOND: Symbol(),
+        EARLY: Symbol(),
+        LATE: Symbol(),
+    };
 
 }

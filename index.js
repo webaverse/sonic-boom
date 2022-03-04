@@ -1553,7 +1553,7 @@ export default () => {
 
         const startTime = performance.now();
         let lastTimestamp = startTime;
-        electronicball.update(0,-1);
+        electronicball.update(0, Electronicball.UPDATES.INIT);
 
         const localVector = new THREE.Vector3();
 
@@ -1584,13 +1584,13 @@ export default () => {
                 electronicball.position.y-=50000;
             } */
             if(narutoRunTime==0){
-                electronicball.update(timeDiff,0);
+                electronicball.update(timeDiff, Electronicball.UPDATES.FIRST);
                 
                 electronicball.position.x+=1.2*localVector.x;
                 electronicball.position.z+=1.2*localVector.z;
             }
             else if(narutoRunTime==1){
-                electronicball.update(timeDiff,10);
+                electronicball.update(timeDiff, Electronicball.UPDATES.SECOND);
                 
             }
             // else if(narutoRunTime>0 && narutoRunTime<80){
@@ -1599,11 +1599,11 @@ export default () => {
                 
             // }
             else if(narutoRunTime>0 && narutoRunTime<10){
-                electronicball.update(timeDiff,2);
+                electronicball.update(timeDiff, Electronicball.UPDATES.EARLY);
                 
             }
             else if(narutoRunTime>=10){
-                electronicball.update(timeDiff,3);
+                electronicball.update(timeDiff, Electronicball.UPDATES.LATE);
                 
             }
             
