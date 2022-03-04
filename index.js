@@ -1551,7 +1551,7 @@ export default () => {
         app.add(electronicball.batchRenderer);
         app.updateMatrixWorld();
 
-        const startTime = Date.now();
+        const startTime = performance.now();
         let lastTimestamp = startTime;
         electronicball.update(0,-1);
 
@@ -1559,7 +1559,7 @@ export default () => {
 
         useFrame(({timestamp}) => {
             
-            const now = Date.now();
+            const now = timestamp;
             const timeDiff = (now - lastTimestamp) / 1000.0;
             lastTimestamp = now;
 
