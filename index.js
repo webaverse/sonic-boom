@@ -3,7 +3,6 @@ import * as THREE from 'three';
 import metaversefile from 'metaversefile';
 const {useApp, useFrame, useLocalPlayer, useCameraManager, useLoaders, useInternals} = metaversefile;
 const baseUrl = import.meta.url.replace(/(\/)[^\/\\]*$/, '$1');
-import { Electronicball } from './electronicball.js';
 
 
 export default () => {
@@ -124,9 +123,6 @@ export default () => {
               type: "t",
               value: wave20
             },
-            iResolution: {
-              value: new THREE.Vector3() 
-            },
             strength: {
                 value: 0.01
             },
@@ -166,7 +162,6 @@ export default () => {
             uniform vec3 color;
             uniform float uTime;
             uniform float strength;
-            uniform vec3 iResolution;
             
                   #define PI 3.1415926
     
@@ -261,7 +256,7 @@ export default () => {
         
             material.uniforms.uTime.value = timestamp/5000;
             material2.uniforms.uTime.value = timestamp/10000;
-            material2.uniforms.iResolution.value.set(window.innerWidth, window.innerHeight, 1);
+            // material2.uniforms.iResolution.value.set(window.innerWidth, window.innerHeight, 1);
             app.updateMatrixWorld();
             
         
@@ -450,7 +445,6 @@ export default () => {
 
 
         let flameMaterial;
-        let prev=0;
         function flame() {
             const geometry = new THREE.CylinderBufferGeometry(0.5, 0.1, 4.5, 50, 50, true);
             flameMaterial = new THREE.ShaderMaterial({
@@ -490,7 +484,7 @@ export default () => {
         }
         flame();
         
-        let playerRotation=[];
+        let playerRotation=[0,0,0,0,0];
         const localVector = new THREE.Vector3();
        
         useFrame(({timestamp}) => {
@@ -528,14 +522,26 @@ export default () => {
             
             
             if(Math.abs(localPlayer.rotation.x)>0){
-                playerRotation.push(localPlayer.rotation.y+Math.PI); 
+                let temp=localPlayer.rotation.y+Math.PI;
+                for(let i=0;i<5;i++){
+                    let temp2=playerRotation[i];
+                    playerRotation[i]=temp;
+                    temp=temp2;
+                    
+                }
             }
             else{
-                playerRotation.push(-localPlayer.rotation.y);
+                let temp=-localPlayer.rotation.y;
+                for(let i=0;i<5;i++){
+                    let temp2=playerRotation[i];
+                    playerRotation[i]=temp;
+                    temp=temp2;
+                    
+                }
             }
-            if(playerRotation.length>=50){
-                flameMaterial.uniforms.playerRotation.value.set( playerRotation[playerRotation.length-1],playerRotation[playerRotation.length-1],playerRotation[playerRotation.length-5]);
-            }
+           
+            flameMaterial.uniforms.playerRotation.value.set( playerRotation[0],0,playerRotation[4]);
+            
             app.updateMatrixWorld();
 
         });
@@ -629,8 +635,7 @@ export default () => {
 
 
         let lightningMaterial;
-        let prev=0;
-        function flame() {
+        function lightning() {
             const geometry = new THREE.CylinderBufferGeometry(0.65, 0.15, 4.5, 50, 50, true);
             lightningMaterial = new THREE.ShaderMaterial({
                 uniforms: {
@@ -671,7 +676,7 @@ export default () => {
             group.add(mesh);
             app.add(group);
         }
-        flame();
+        lightning();
         
         let playerRotation=[];
         let lightningfreq=0;
@@ -712,20 +717,28 @@ export default () => {
             
             
             if(Math.abs(localPlayer.rotation.x)>0){
-                playerRotation.push(localPlayer.rotation.y+Math.PI); 
+                let temp=localPlayer.rotation.y+Math.PI;
+                for(let i=0;i<5;i++){
+                    let temp2=playerRotation[i];
+                    playerRotation[i]=temp;
+                    temp=temp2;
+                }
             }
             else{
-                playerRotation.push(-localPlayer.rotation.y);
+                let temp=-localPlayer.rotation.y;
+                for(let i=0;i<5;i++){
+                    let temp2=playerRotation[i];
+                    playerRotation[i]=temp;
+                    temp=temp2;
+                }
             }
-            if(playerRotation.length>=50){
-                lightningMaterial.uniforms.playerRotation.value.set( playerRotation[playerRotation.length-1],playerRotation[playerRotation.length-1],playerRotation[playerRotation.length-5]);
-            }
+            lightningMaterial.uniforms.playerRotation.value.set( playerRotation[0],0,playerRotation[4]);
+            
             if(lightningfreq%1==0){
                 lightningMaterial.uniforms.random.value=Math.random()*Math.PI;
             }
-            
             //lightningMaterial.uniforms.strength.value=Math.abs(Math.cos(timestamp/10000));
-            
+
             lightningfreq++;
             app.updateMatrixWorld();
 
@@ -734,9 +747,36 @@ export default () => {
     //########################################## vertical trail ######################################
     {
         const planeGeometry = new THREE.BufferGeometry();
+        let planeNumber=100;
+        let position= new Float32Array(1800);
+        planeGeometry.setAttribute('position', new THREE.BufferAttribute(position, 3));
+
+        let uv = new Float32Array(1200);
+        let fraction = 1;
+        let ratio = 1 / planeNumber;
+        for (let i = 0; i < planeNumber; i++) {
+            uv[i * 12 + 0] = 0;
+            uv[i * 12 + 1] = fraction;
     
-        let position= new Float32Array(18);
-        let uv = new Float32Array(12);
+            uv[i * 12 + 2] = 1;
+            uv[i * 12 + 3] = fraction;
+    
+            uv[i * 12 + 4] = 0;
+            uv[i * 12 + 5] = fraction - ratio;
+    
+            uv[i * 12 + 6] = 1;
+            uv[i * 12 + 7] = fraction - ratio;
+    
+            uv[i * 12 + 8] = 0;
+            uv[i * 12 + 9] = fraction - ratio;
+    
+            uv[i * 12 + 10] = 1;
+            uv[i * 12 + 11] = fraction;
+    
+            fraction -= ratio;
+    
+        }
+        planeGeometry.setAttribute('uv', new THREE.BufferAttribute(uv, 2));
     
         
         
@@ -746,7 +786,7 @@ export default () => {
                     value: 0,
                 },
                 opacity: {
-                    value: 0,
+                    value: 1,
                 },
                 textureR: { type: 't', value: textureR },
                 textureG: { type: 't', value: textureG },
@@ -838,86 +878,94 @@ export default () => {
           blending: THREE.AdditiveBlending,
       });
     
-      
-      
-    
       let plane=new THREE.Mesh(planeGeometry,material);
       app.add(plane);
       plane.position.y=1;
       plane.frustumCulled = false;
     
-    
-      let deletePosTimer = 0;
-     
-    
-    
-    
-      
       useFrame(({timestamp}) => {
-        
-        
-        
-        
-        
-        if (deletePosTimer % 2 == 0 || position.length > 18*100) {
-          if (position.length > 18) {
-              let temp = new Float32Array(position.length - 18);
-              for (let i = 0; i < position.length - 18; i++) {
-                  temp[i] = position[i];
-              }
-              position = temp;
-              plane.geometry.setAttribute('position', new THREE.BufferAttribute(position, 3));
-    
-          }
+        let temp=[];
+        for(let i=0;i<18;i++){
+            temp[i]=position[i];
         }
-    
-        let planeNumber = (position.length + 18) / 18;
+        for (let i = 0; i < planeNumber; i++){
+            if(i===0){
+                position[0] = localPlayer.position.x;
+                position[1] = localPlayer.position.y-1.;
+                position[2] = localPlayer.position.z;
+                if (localPlayer.avatar) {
+                    position[1] -= localPlayer.avatar.height;
+                    position[1] += 1.18;
+                }
+                position[3] = localPlayer.position.x;
+                position[4] = localPlayer.position.y-2.;
+                position[5] = localPlayer.position.z;
+                if (localPlayer.avatar) {
+                    position[4] -= localPlayer.avatar.height;
+                    position[4] += 1.18;
+                }
+            
+                position[6] = position[18];
+                position[7] = position[19];
+                position[8] = position[20];
+            
+                position[9] = position[21];
+                position[10] = position[22];
+                position[11] = position[23];
+            
+                position[12] = position[18];
+                position[13] = position[19];
+                position[14] = position[20];
+            
+                position[15] = localPlayer.position.x;
+                position[16] = localPlayer.position.y-2.;
+                position[17] = localPlayer.position.z;
+                if (localPlayer.avatar) {
+                    position[16] -= localPlayer.avatar.height;
+                    position[16] += 1.18;
+                }
+            }
+            else{
+                let temp2=[];
+                for(let j=0;j<18;j++){
+                    temp2[j]=position[i*18+j];
+                    position[i*18+j]=temp[j];
+                    temp[j]=temp2[j];
+                }
+                
 
-        let tempPosition = new Float32Array(planeNumber * 18);
-        tempPosition[0] = localPlayer.position.x;
-        tempPosition[1] = localPlayer.position.y-1.;
-        tempPosition[2] = localPlayer.position.z;
-        if (localPlayer.avatar) {
-            tempPosition[1] -= localPlayer.avatar.height;
-            tempPosition[1] += 1.18;
+            }
         }
-        tempPosition[3] = localPlayer.position.x;
-        tempPosition[4] = localPlayer.position.y-2.;
-        tempPosition[5] = localPlayer.position.z;
-        if (localPlayer.avatar) {
-            tempPosition[4] -= localPlayer.avatar.height;
-            tempPosition[4] += 1.18;
+        
+        plane.geometry.verticesNeedUpdate = true;
+        plane.geometry.dynamic = true;
+        plane.geometry.attributes.position.needsUpdate = true;
+        
+        material.uniforms.uTime.value = timestamp/1000;
+        if(narutoRunTime>=10){
+            material.uniforms.opacity.value = 1;
         }
-    
-        tempPosition[6] = position[0];
-        tempPosition[7] = position[1];
-        tempPosition[8] = position[2];
-    
-        tempPosition[9] = position[3];
-        tempPosition[10] = position[4];
-        tempPosition[11] = position[5];
-    
-        tempPosition[12] = position[0];
-        tempPosition[13] = position[1];
-        tempPosition[14] = position[2];
-    
-        tempPosition[15] = localPlayer.position.x;
-        tempPosition[16] = localPlayer.position.y-2.;
-        tempPosition[17] = localPlayer.position.z;
-        if (localPlayer.avatar) {
-            tempPosition[16] -= localPlayer.avatar.height;
-            tempPosition[16] += 1.18;
+        else{
+            material.uniforms.opacity.value -= 0.02;
         }
-    
-        for (let i = 0; i < position.length; i++) {
-            tempPosition[i + 18] = position[i];
+        if(narutoRunTime>0 && narutoRunTime<10){
+            material.uniforms.opacity.value = 0;
         }
-    
-        position = tempPosition;
+       
+        
+        app.updateMatrixWorld();
+          
+      
+      });
+    }
+    //########################################## horizontal trail ######################################
+    {
+        const planeGeometry = new THREE.BufferGeometry();
+        const planeNumber=100;
+        let position= new Float32Array(1800);
         planeGeometry.setAttribute('position', new THREE.BufferAttribute(position, 3));
-    
-    
-        let uv = new Float32Array(planeNumber * 12);
+
+        let uv = new Float32Array(1200);
         let fraction = 1;
         let ratio = 1 / planeNumber;
         for (let i = 0; i < planeNumber; i++) {
@@ -943,34 +991,6 @@ export default () => {
     
         }
         planeGeometry.setAttribute('uv', new THREE.BufferAttribute(uv, 2));
-        
-        
-        deletePosTimer++;
-        //material.uniforms.iResolution.value.set(window.innerWidth, window.innerHeight, 1);
-        //material.uniforms.iTime.value = timestamp/1000;
-        material.uniforms.uTime.value = timestamp/1000;
-        if(narutoRunTime>=10){
-            material.uniforms.opacity.value = 1;
-        }
-        else{
-            material.uniforms.opacity.value -= 0.02;
-        }
-        if(narutoRunTime>0 && narutoRunTime<10){
-            material.uniforms.opacity.value = 0;
-        }
-       
-        
-        app.updateMatrixWorld();
-          
-      
-      });
-    }
-    //########################################## horizontal trail ######################################
-    {
-        const planeGeometry = new THREE.BufferGeometry();
-    
-        let position= new Float32Array(18);
-        let uv = new Float32Array(12);
        
         
         
@@ -1078,7 +1098,6 @@ export default () => {
       plane.frustumCulled = false;
     
     
-      let deletePosTimer = 0;
      
       const geometryp = new THREE.PlaneGeometry( 0.1, 0.1 );
       const materialp = new THREE.MeshBasicMaterial( {color: 0xff0000, side: THREE.DoubleSide, transparent:true, opacity:0, depthWrite:false} );
@@ -1141,110 +1160,63 @@ export default () => {
             point2.position.x+=0.6*localVector.x;
             point2.position.z+=0.6*localVector.z;
        }
-        
-        
-        
-        if (deletePosTimer % 2 == 0 || position.length > 18*100) {
-          if (position.length > 18) {
-              let temp = new Float32Array(position.length - 18);
-              for (let i = 0; i < position.length - 18; i++) {
-                  temp[i] = position[i];
-              }
-              position = temp;
-              plane.geometry.setAttribute('position', new THREE.BufferAttribute(position, 3));
-    
-          }
+       let temp=[];
+        for(let i=0;i<18;i++){
+            temp[i]=position[i];
         }
-    
-        let planeNumber = (position.length + 18) / 18;
-        // let bottom=2.55;
-        // let top=0.45;
-        // localPlayer.getWorldDirection(dum)
-        // dum = dum.normalize();
-    
-        
-        
-        let tempPosition = new Float32Array(planeNumber * 18);
-        tempPosition[0] = point1.position.x;
-        tempPosition[1] = localPlayer.position.y-1.55;
-        tempPosition[2] = point1.position.z;
-        if (localPlayer.avatar) {
-            tempPosition[1] -= localPlayer.avatar.height;
-            tempPosition[1] += 1.18;
-        }
-        tempPosition[3] = point2.position.x;
-        tempPosition[4] = localPlayer.position.y-1.55;
-        tempPosition[5] = point2.position.z;
-        if (localPlayer.avatar) {
-            tempPosition[4] -= localPlayer.avatar.height;
-            tempPosition[4] += 1.18;
-        }
-    
-        tempPosition[6] = position[0];
-        tempPosition[7] = position[1];
-        tempPosition[8] = position[2];
-    
-        tempPosition[9] = position[3];
-        tempPosition[10] = position[4];
-        tempPosition[11] = position[5];
-    
-        tempPosition[12] = position[0];
-        tempPosition[13] = position[1];
-        tempPosition[14] = position[2];
-    
-        tempPosition[15] = point2.position.x;
-        tempPosition[16] = localPlayer.position.y-1.55;
-        tempPosition[17] = point2.position.z;
-        if (localPlayer.avatar) {
-            tempPosition[16] -= localPlayer.avatar.height;
-            tempPosition[16] += 1.18;
+        for (let i = 0; i < planeNumber; i++){
+            if(i===0){
+                position[0] = point1.position.x;
+                position[1] = localPlayer.position.y-1.55;
+                position[2] = point1.position.z;
+                if (localPlayer.avatar) {
+                    position[1] -= localPlayer.avatar.height;
+                    position[1] += 1.18;
+                }
+                position[3] = point2.position.x;
+                position[4] = localPlayer.position.y-1.55;
+                position[5] = point2.position.z;
+                if (localPlayer.avatar) {
+                    position[4] -= localPlayer.avatar.height;
+                    position[4] += 1.18;
+                }
+            
+                position[6] = position[18];
+                position[7] = position[19];
+                position[8] = position[20];
+            
+                position[9] = position[21];
+                position[10] = position[22];
+                position[11] = position[23];
+            
+                position[12] = position[18];
+                position[13] = position[19];
+                position[14] = position[20];
+            
+                position[15] = point2.position.x;
+                position[16] = localPlayer.position.y-1.55;
+                position[17] = point2.position.z;
+                if (localPlayer.avatar) {
+                    position[16] -= localPlayer.avatar.height;
+                    position[16] += 1.18;
+                }
+            }
+            else{
+                let temp2=[];
+                for(let j=0;j<18;j++){
+                    temp2[j]=position[i*18+j];
+                    position[i*18+j]=temp[j];
+                    temp[j]=temp2[j];
+                }
+                
+
+            }
         }
         
-    
-        for (let i = 0; i < position.length; i++) {
-            tempPosition[i + 18] = position[i];
-        }
-    
-        position = tempPosition;
-        planeGeometry.setAttribute('position', new THREE.BufferAttribute(position, 3));
-    
-    
-        uv = new Float32Array(planeNumber * 12);
-        let fraction = 1;
-        let ratio = 1 / planeNumber;
-        for (let i = 0; i < planeNumber; i++) {
-            uv[i * 12 + 0] = 0;
-            uv[i * 12 + 1] = fraction;
-    
-            uv[i * 12 + 2] = 1;
-            uv[i * 12 + 3] = fraction;
-    
-            uv[i * 12 + 4] = 0;
-            uv[i * 12 + 5] = fraction - ratio;
-    
-            uv[i * 12 + 6] = 1;
-            uv[i * 12 + 7] = fraction - ratio;
-    
-            uv[i * 12 + 8] = 0;
-            uv[i * 12 + 9] = fraction - ratio;
-    
-            uv[i * 12 + 10] = 1;
-            uv[i * 12 + 11] = fraction;
-    
-            fraction -= ratio;
-    
-        }
-    
-        planeGeometry.setAttribute('uv', new THREE.BufferAttribute(uv, 2));
+        plane.geometry.verticesNeedUpdate = true;
+        plane.geometry.dynamic = true;
+        plane.geometry.attributes.position.needsUpdate = true;
         
-        
-          
-    
-        
-        
-        deletePosTimer++;
-        //material.uniforms.iResolution.value.set(window.innerWidth, window.innerHeight, 1);
-        //material.uniforms.iTime.value = timestamp/1000;
         if(narutoRunTime>=10){
             material.uniforms.opacity.value = 1;
         }
@@ -1260,6 +1232,489 @@ export default () => {
           
       
       });
+    }
+    //##################################### main ball ##################################################
+    {
+        
+        const mainBallGeometry = new THREE.SphereBufferGeometry(1.9, 32,32);
+        const instGeom = new THREE.InstancedBufferGeometry().copy(mainBallGeometry);
+
+        const num = 60;
+        let instPos = []; 
+        let instId = []; 
+        let instAngle = []; 
+        for (let i = 0; i < num; i++) {
+            instPos.push(0, 0, 0);
+            instId.push(i);
+            instAngle.push(0, 0, 0);
+        }
+        instGeom.setAttribute("instPos", new THREE.InstancedBufferAttribute(new Float32Array(instPos), 3));
+        instGeom.setAttribute("instId", new THREE.InstancedBufferAttribute(new Float32Array(instId), 1));
+        instGeom.setAttribute("instAngle", new THREE.InstancedBufferAttribute(new Float32Array(instAngle), 3));
+        instGeom.instanceCount = num;
+
+
+        const mainballMaterial = new THREE.ShaderMaterial({
+            uniforms: {
+                sphereNum: { value: num },
+                uTime: { value: 0 },
+                random: { value: 0 },
+                opacity: { value: 0 },
+                size: { value: 1 }
+            },
+            vertexShader: `
+                ${THREE.ShaderChunk.common}
+                ${THREE.ShaderChunk.logdepthbuf_pars_vertex}
+                uniform float uTime;
+                uniform float size;
+                uniform float sphereNum;
+
+                attribute vec3 instPos;
+                attribute vec3 instAngle;
+                attribute float instId;
+            
+                varying vec2 vUv;
+                varying float vId;
+                
+                
+                void main() {
+                    vUv=uv;
+                    vId=instId;
+                    vec3 pos = vec3(position);
+                    pos += instPos;
+                    if(vId<=32.){
+                        pos*=(instId*instId*instId*instId)/(sphereNum*sphereNum*sphereNum*sphereNum)+0.18;
+                    }
+                    else
+                        pos*=(instId*instId)/(sphereNum*sphereNum);
+                    pos*=size;
+                    gl_Position = projectionMatrix * modelViewMatrix * vec4(pos,1.0);
+                    ${THREE.ShaderChunk.logdepthbuf_vertex}
+                }
+            `,
+            fragmentShader: `
+                ${THREE.ShaderChunk.logdepthbuf_pars_fragment}
+                uniform float uTime;
+                uniform float opacity;
+                uniform float random;
+                uniform float sphereNum;
+                
+                varying vec2 vUv;
+                varying float vId;
+                
+                void main() {
+                    if(vId<=52.){
+                        gl_FragColor=vec4(0.3984,0.4921,0.765625,(0.9-((vId*vId)/(sphereNum*sphereNum))));
+                        if(vId>=33.99)
+                            gl_FragColor.a/=10.5;
+                        else{
+                            gl_FragColor.a/=1.2;
+                        }
+                            
+                    }   
+                    else{
+                        gl_FragColor=vec4(0.3984,0.4921,0.765625, 0.003*(vId/sphereNum));
+                        gl_FragColor.a/=50.;
+                    }
+                    if(vId>=23.99){
+                        gl_FragColor.a*=((vId*vId)/(sphereNum*sphereNum))*0.9;
+                    }
+                    if(vId>=43.99){
+                        gl_FragColor.a*=((vId*vId)/(sphereNum*sphereNum))*0.6;
+                    }
+                    gl_FragColor.a*=opacity;
+                    ${THREE.ShaderChunk.logdepthbuf_fragment}
+                    
+                }
+            `,
+            side: THREE.DoubleSide,
+            transparent: true,
+            depthWrite: false,
+            blending: THREE.AdditiveBlending,
+        });
+
+        const mainBall = new THREE.Mesh(instGeom, mainballMaterial);
+        const group = new THREE.Group();
+        group.add(mainBall)
+        app.add(group);
+        const localVector = new THREE.Vector3();
+        useFrame(({timestamp}) => {
+
+            group.rotation.copy(localPlayer.rotation);
+            group.position.copy(localPlayer.position);
+            localPlayer.getWorldDirection(localVector)
+            localVector.normalize();
+            group.position.x-=.1*localVector.x;
+            group.position.z-=.1*localVector.z;
+
+            
+            if (localPlayer.avatar) {
+                group.position.y -= localPlayer.avatar.height;
+                group.position.y += 0.65;
+            }
+           
+            if(narutoRunTime==0){
+                mainballMaterial.uniforms.opacity.value-=0.02;
+                mainballMaterial.uniforms.size.value/=1.01;
+            }
+            else if(narutoRunTime==1){
+                mainballMaterial.uniforms.opacity.value=1;
+                mainballMaterial.uniforms.size.value=4.5;
+                
+            }
+            else if(narutoRunTime>1 ){
+                if(mainballMaterial.uniforms.size.value>1){
+                    mainballMaterial.uniforms.size.value/=1.05;
+                }
+                else{
+                    mainballMaterial.uniforms.size.value=1;
+                }
+                
+            }
+            // else if(narutoRunTime>=10){
+            //     electronicball.update(timeDiff, Electronicball.UPDATES.LATE);
+                
+            // }
+            
+            mainballMaterial.uniforms.uTime.value=timestamp/100000;
+            app.updateMatrixWorld();
+        
+        });
+    }
+    //##################################### electricity1 ##################################################
+    {
+        
+        const electricityGeometry = new THREE.PlaneBufferGeometry(3., 3.);
+        const instGeom = new THREE.InstancedBufferGeometry().copy(electricityGeometry);
+
+        const num = 40;
+        let instPos = []; 
+        let instId = []; 
+        let instAngle = []; 
+        for (let i = 0; i < num; i++) {
+            instPos.push(0, 0, 0);
+            instId.push(i);
+            instAngle.push(Math.random()*i, Math.random()*i, Math.random()*i);
+        }
+        instGeom.setAttribute("instPos", new THREE.InstancedBufferAttribute(new Float32Array(instPos), 3));
+        instGeom.setAttribute("instId", new THREE.InstancedBufferAttribute(new Float32Array(instId), 1));
+        instGeom.setAttribute("instAngle", new THREE.InstancedBufferAttribute(new Float32Array(instAngle), 3));
+        instGeom.instanceCount = num;
+
+        const textureLoader = new THREE.TextureLoader()
+        const texture = textureLoader.load(`${baseUrl}/textures/texture8.png`)
+        const electricityMaterial = new THREE.ShaderMaterial({
+            uniforms: {
+                sphereNum: { value: num },
+                uTime: { value: 0 },
+                opacity: { value: 0 },
+                size: { value: 0 },
+                random: { value: 0 },
+                glowIndex: { value: 0 },
+                uTexture: {
+                    type: "t",
+                    value: texture
+                },
+
+            },
+            vertexShader: `
+                ${THREE.ShaderChunk.common}
+                ${THREE.ShaderChunk.logdepthbuf_pars_vertex}
+                uniform float uTime;
+                uniform float sphereNum;
+                uniform float size;
+
+                attribute vec3 instPos;
+                attribute vec3 instAngle;
+                attribute float instId;
+            
+                varying vec2 vUv;
+                varying float vId;
+                
+                
+                void main() {
+                    mat3 rotX =
+                            mat3(1.0, 0.0, 0.0, 0.0, cos(instAngle.x), sin(instAngle.x), 0.0, -sin(instAngle.x), cos(instAngle.x));
+                    mat3 rotY =
+                            mat3(cos(instAngle.y), 0.0, -sin(instAngle.y), 0.0, 1.0, 0.0, sin(instAngle.y), 0.0, cos(instAngle.y));
+                    mat3 rotZ =
+                            mat3(
+                                cos(instAngle.z), sin(instAngle.z), 0.0,
+                                -sin(instAngle.z), cos(instAngle.z), 0.0, 
+                                0.0, 0.0 , 1.0
+                            );
+                        
+                    vUv=uv;
+                    vId=instId;
+                    vec3 pos = vec3(position);
+                    pos += instPos;
+                    pos*=rotX;
+                    pos*=rotY;
+                    pos*=rotZ;
+                    pos*=0.8*cos(uTime*100.);
+                    pos*=size;
+                    gl_Position = projectionMatrix * modelViewMatrix * vec4(pos,1.0);
+                    ${THREE.ShaderChunk.logdepthbuf_vertex}
+                }
+            `,
+            fragmentShader: `
+                ${THREE.ShaderChunk.logdepthbuf_pars_fragment}
+                uniform float uTime;
+                uniform float random;
+                uniform float sphereNum;
+                uniform float glowIndex;
+                uniform float opacity;
+
+                uniform sampler2D uTexture;
+                
+                varying vec2 vUv;
+                varying float vId;
+                
+                void main() {
+                    vec4 tex = texture2D(uTexture,vUv).rgba;   
+                    if( tex.a < 0.01  )
+                    {
+                        discard;    
+                    } 
+                           
+                    gl_FragColor=vec4(1.0,1.0,1.,tex.a);
+                    gl_FragColor.a/=2.;
+                    if(vId>=glowIndex-0.01 && vId<=glowIndex+0.09)
+                        gl_FragColor.a*=1.;
+                    else
+                        gl_FragColor.a*=0.;
+                    gl_FragColor.r=abs(sin(uTime));
+                    gl_FragColor.g=abs(sin(uTime));
+                    gl_FragColor.b=abs(cos(uTime));
+                    if(glowIndex>sphereNum/2.)
+                        gl_FragColor.a*=5.;
+                    gl_FragColor.a*=opacity;
+                    ${THREE.ShaderChunk.logdepthbuf_fragment}
+                    
+                }
+            `,
+            side: THREE.DoubleSide,
+            transparent: true,
+            depthWrite: false,
+            blending: THREE.AdditiveBlending,
+        });
+        const electricity = new THREE.Mesh(instGeom, electricityMaterial);
+        const group = new THREE.Group();
+        group.add(electricity)
+        app.add(group);
+        const localVector = new THREE.Vector3();
+        let lightningfreq=0;
+        useFrame(({timestamp}) => {
+
+            group.rotation.copy(localPlayer.rotation);
+            group.position.copy(localPlayer.position);
+            localPlayer.getWorldDirection(localVector)
+            localVector.normalize();
+            group.position.x-=.1*localVector.x;
+            group.position.z-=.1*localVector.z;
+            
+            if (localPlayer.avatar) {
+                group.position.y -= localPlayer.avatar.height;
+                group.position.y += 0.65;
+            }
+           
+            if(narutoRunTime==0){
+                electricityMaterial.uniforms.opacity.value-=0.02;
+            }
+            else if(narutoRunTime==1){
+                electricityMaterial.uniforms.opacity.value=1;
+                electricityMaterial.uniforms.size.value=4.5;
+                
+            }
+            else if(narutoRunTime>1 ){
+                if(electricityMaterial.uniforms.size.value>1){
+                    electricityMaterial.uniforms.size.value/=1.05;
+                }
+                else{
+                    electricityMaterial.uniforms.size.value=1;
+                }
+                
+            }
+            
+            electricityMaterial.uniforms.uTime.value=timestamp/100;
+            if(lightningfreq%1==0){
+                electricityMaterial.uniforms.glowIndex.value=Math.floor(Math.random()*num);
+            }
+            
+            lightningfreq++;
+            
+            app.updateMatrixWorld();
+        
+        });
+    }
+    //##################################### electricity2 ##################################################
+    {
+        const electricityGeometry2 = new THREE.PlaneBufferGeometry(1.8, 1.8);
+        const instGeom = new THREE.InstancedBufferGeometry().copy(electricityGeometry2);
+
+        const num = 20;
+        let instPos = []; 
+        let instId = []; 
+        let instAngle = []; 
+        for (let i = 0; i < num; i++) {
+            instPos.push(0, 0, 0);
+            instId.push(i);
+            instAngle.push(Math.random()*i, Math.random()*i, Math.random()*i);
+        }
+        instGeom.setAttribute("instPos", new THREE.InstancedBufferAttribute(new Float32Array(instPos), 3));
+        instGeom.setAttribute("instId", new THREE.InstancedBufferAttribute(new Float32Array(instId), 1));
+        instGeom.setAttribute("instAngle", new THREE.InstancedBufferAttribute(new Float32Array(instAngle), 3));
+        instGeom.instanceCount = num;
+
+        const textureLoader = new THREE.TextureLoader()
+        const texture = textureLoader.load(`${baseUrl}/textures/texture11.png`)
+        const electricityMaterial = new THREE.ShaderMaterial({
+            uniforms: {
+                sphereNum: { value: num },
+                uTime: { value: 0 },
+                opacity: { value: 0 },
+                size: { value: 0 },
+                random: { value: 0 },
+                glowIndex: { value: 0 },
+                uTexture: {
+                    type: "t",
+                    value: texture
+                },
+
+            },
+            vertexShader: `
+                ${THREE.ShaderChunk.common}
+                ${THREE.ShaderChunk.logdepthbuf_pars_vertex}
+                uniform float uTime;
+                uniform float sphereNum;
+                uniform float size;
+
+                attribute vec3 instPos;
+                attribute vec3 instAngle;
+                attribute float instId;
+            
+                varying vec2 vUv;
+                varying float vId;
+                
+                
+                void main() {
+                    mat3 rotX =
+                            mat3(1.0, 0.0, 0.0, 0.0, cos(instAngle.x), sin(instAngle.x), 0.0, -sin(instAngle.x), cos(instAngle.x));
+                    mat3 rotY =
+                            mat3(cos(instAngle.y), 0.0, -sin(instAngle.y), 0.0, 1.0, 0.0, sin(instAngle.y), 0.0, cos(instAngle.y));
+                    mat3 rotZ =
+                            mat3(
+                                cos(instAngle.z), sin(instAngle.z), 0.0,
+                                -sin(instAngle.z), cos(instAngle.z), 0.0, 
+                                0.0, 0.0 , 1.0
+                            );
+                        
+                    vUv=uv;
+                    vId=instId;
+                    vec3 pos = vec3(position);
+                    pos += instPos;
+                    pos*=rotX;
+                    pos*=rotY;
+                    pos*=rotZ;
+                    //pos*=0.8*cos(uTime*100.);
+                    pos*=size;
+                    gl_Position = projectionMatrix * modelViewMatrix * vec4(pos,1.0);
+                    ${THREE.ShaderChunk.logdepthbuf_vertex}
+                }
+            `,
+            fragmentShader: `
+                ${THREE.ShaderChunk.logdepthbuf_pars_fragment}
+                uniform float uTime;
+                uniform float opacity;
+                uniform float random;
+                uniform float sphereNum;
+                uniform float glowIndex;
+
+                uniform sampler2D uTexture;
+                
+                varying vec2 vUv;
+                varying float vId;
+                
+                void main() {
+                    vec4 tex = texture2D(uTexture,vUv).rgba;   
+                    if( tex.a < 0.01  )
+                    {
+                        discard;    
+                    } 
+                           
+                    gl_FragColor=vec4(1.0,1.0,1.,tex.a);
+                    gl_FragColor.a/=2.;
+                    if(vId>=glowIndex-0.01 && vId<=glowIndex+0.09)
+                        gl_FragColor.a*=1.;
+                    else
+                        gl_FragColor.a*=0.;
+                    gl_FragColor.r=abs(sin(uTime));
+                    gl_FragColor.g=abs(sin(uTime));
+                    gl_FragColor.b=abs(cos(uTime));
+                    if(glowIndex>sphereNum/2.)
+                        gl_FragColor.a*=5.;
+                    gl_FragColor.a*=opacity;
+                    ${THREE.ShaderChunk.logdepthbuf_fragment}
+                    
+                }
+            `,
+            side: THREE.DoubleSide,
+            transparent: true,
+            depthWrite: false,
+            blending: THREE.AdditiveBlending,
+        });
+
+        const electricity = new THREE.Mesh(instGeom, electricityMaterial);
+        const group = new THREE.Group();
+        group.add(electricity)
+        app.add(group);
+        const localVector = new THREE.Vector3();
+        let lightningfreq=0;
+        useFrame(({timestamp}) => {
+
+            group.rotation.copy(localPlayer.rotation);
+            group.position.copy(localPlayer.position);
+            localPlayer.getWorldDirection(localVector)
+            localVector.normalize();
+            group.position.x-=.1*localVector.x;
+            group.position.z-=.1*localVector.z;
+
+            if (localPlayer.avatar) {
+                group.position.y -= localPlayer.avatar.height;
+                group.position.y += 0.65;
+            }
+           
+            if(narutoRunTime==0){
+                electricityMaterial.uniforms.opacity.value-=0.02;
+            }
+            else if(narutoRunTime==1){
+                electricityMaterial.uniforms.opacity.value=1;
+                electricityMaterial.uniforms.size.value=4.5;
+                
+            }
+            else if(narutoRunTime>1 ){
+                if(electricityMaterial.uniforms.size.value>1){
+                    electricityMaterial.uniforms.size.value/=1.05;
+                }
+                else{
+                    electricityMaterial.uniforms.size.value=1;
+                }
+                
+            }
+
+
+            
+            
+            electricityMaterial.uniforms.uTime.value=timestamp/100;
+            if(lightningfreq%1==0){
+                electricityMaterial.uniforms.glowIndex.value=Math.floor(Math.random()*num);
+            }
+            
+            lightningfreq++;
+            
+            app.updateMatrixWorld();
+        
+        });
     }
     //########################################## flame ##########################################
     // {
@@ -1546,72 +2001,72 @@ export default () => {
     //########################################### electronic ball #############################################
     
     {
-        const electronicball = new Electronicball();
-        app.add(electronicball);
-        app.add(electronicball.batchRenderer);
-        app.updateMatrixWorld();
+        // const electronicball = new Electronicball();
+        // app.add(electronicball);
+        // app.add(electronicball.batchRenderer);
+        // app.updateMatrixWorld();
 
-        const startTime = performance.now();
-        let lastTimestamp = startTime;
-        electronicball.update(0, Electronicball.UPDATES.INIT);
+        // const startTime = performance.now();
+        // let lastTimestamp = startTime;
+        // electronicball.update(0, Electronicball.UPDATES.INIT);
 
-        const localVector = new THREE.Vector3();
+        // const localVector = new THREE.Vector3();
 
-        useFrame(({timestamp}) => {
+        // useFrame(({timestamp}) => {
             
-            const now = timestamp;
-            const timeDiff = (now - lastTimestamp) / 1000.0;
-            lastTimestamp = now;
+        //     const now = timestamp;
+        //     const timeDiff = (now - lastTimestamp) / 1000.0;
+        //     lastTimestamp = now;
 
 
             
-            electronicball.position.copy(localPlayer.position);
-            localPlayer.getWorldDirection(localVector)
-            localVector.normalize();
-            //console.log(dum);
-            electronicball.position.x-=1.2*localVector.x;
-            electronicball.position.z-=1.2*localVector.z;
+        //     electronicball.position.copy(localPlayer.position);
+        //     localPlayer.getWorldDirection(localVector)
+        //     localVector.normalize();
+        //     //console.log(dum);
+        //     electronicball.position.x-=1.2*localVector.x;
+        //     electronicball.position.z-=1.2*localVector.z;
             
             
             
-            // if(!localPlayer.hasAction('fly') && !localPlayer.hasAction('jump')){
-                if (localPlayer.avatar) {
-                    electronicball.position.y -= localPlayer.avatar.height;
-                    electronicball.position.y += 0.65;
-                }
-            /* }
-            else{
-                electronicball.position.y-=50000;
-            } */
-            if(narutoRunTime==0){
-                electronicball.update(timeDiff, Electronicball.UPDATES.FIRST);
+        //     // if(!localPlayer.hasAction('fly') && !localPlayer.hasAction('jump')){
+        //         if (localPlayer.avatar) {
+        //             electronicball.position.y -= localPlayer.avatar.height;
+        //             electronicball.position.y += 0.65;
+        //         }
+        //     /* }
+        //     else{
+        //         electronicball.position.y-=50000;
+        //     } */
+        //     if(narutoRunTime==0){
+        //         electronicball.update(timeDiff, Electronicball.UPDATES.FIRST);
                 
-                electronicball.position.x+=1.2*localVector.x;
-                electronicball.position.z+=1.2*localVector.z;
-            }
-            else if(narutoRunTime==1){
-                electronicball.update(timeDiff, Electronicball.UPDATES.SECOND);
+        //         electronicball.position.x+=1.2*localVector.x;
+        //         electronicball.position.z+=1.2*localVector.z;
+        //     }
+        //     else if(narutoRunTime==1){
+        //         electronicball.update(timeDiff, Electronicball.UPDATES.SECOND);
                 
-            }
-            // else if(narutoRunTime>0 && narutoRunTime<80){
+        //     }
+        //     // else if(narutoRunTime>0 && narutoRunTime<80){
                 
-            //     electronicball.update(timeDiff,1);
+        //     //     electronicball.update(timeDiff,1);
                 
-            // }
-            else if(narutoRunTime>0 && narutoRunTime<10){
-                electronicball.update(timeDiff, Electronicball.UPDATES.EARLY);
+        //     // }
+        //     else if(narutoRunTime>0 && narutoRunTime<10){
+        //         electronicball.update(timeDiff, Electronicball.UPDATES.EARLY);
                 
-            }
-            else if(narutoRunTime>=10){
-                electronicball.update(timeDiff, Electronicball.UPDATES.LATE);
+        //     }
+        //     else if(narutoRunTime>=10){
+        //         electronicball.update(timeDiff, Electronicball.UPDATES.LATE);
                 
-            }
+        //     }
             
 
-            app.updateMatrixWorld();
+        //     app.updateMatrixWorld();
            
         
-        });
+        // });
     }
     
     
@@ -1760,7 +2215,7 @@ export default () => {
   {
     const localVector = new THREE.Vector3();
     const _shake = () => {
-        if (narutoRunTime === 1) {
+        if (narutoRunTime >= 1 && narutoRunTime <= 5) {
             localVector.setFromMatrixPosition(localPlayer.matrixWorld);
             cameraManager.addShake( localVector, 0.2, 30, 500);
         }
@@ -1891,13 +2346,16 @@ export default () => {
                 // }
                 // else{
                     wave.scene.scale.set(wave.scene.scale.x+.1,wave.scene.scale.y+0.0005,wave.scene.scale.z+.1);
-                    group.position.copy(localPlayer.position);
-                    localPlayer.getWorldDirection(localVector);
-                    localVector.normalize();
-                    group.position.x-=0.2*localVector.x;
-                    group.position.z-=0.2*localVector.z;
-                    group.rotation.copy(localPlayer.rotation);
-                    wave.scene.position.y=-1.;
+                    if(narutoRunTime ===1){
+                        group.position.copy(localPlayer.position);
+                        localPlayer.getWorldDirection(localVector);
+                        localVector.normalize();
+                        group.position.x-=0.2*localVector.x;
+                        group.position.z-=0.2*localVector.z;
+                        group.rotation.copy(localPlayer.rotation);
+                        wave.scene.position.y=-1.;
+                    }
+                    
                     if(wave.scene.scale.x<=5){
                         _shake();
                         
