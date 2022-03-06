@@ -1356,7 +1356,7 @@ export default () => {
             }
            
             if(narutoRunTime==0){
-                mainballMaterial.uniforms.opacity.value-=0.02;
+                mainballMaterial.uniforms.opacity.value/=1.2;
                 mainballMaterial.uniforms.size.value/=1.01;
             }
             else if(narutoRunTime==1){
@@ -1521,7 +1521,7 @@ export default () => {
             }
            
             if(narutoRunTime==0){
-                electricityMaterial.uniforms.opacity.value-=0.02;
+                electricityMaterial.uniforms.opacity.value/=1.08;
                 electricityMaterial.uniforms.size.value/=1.01;
             }
             else if(narutoRunTime==1){
@@ -1688,7 +1688,7 @@ export default () => {
             }
            
             if(narutoRunTime==0){
-                electricityMaterial.uniforms.opacity.value-=0.02;
+                electricityMaterial.uniforms.opacity.value/=1.08;
                 electricityMaterial.uniforms.size.value/=1.01;
             }
             else if(narutoRunTime==1){
