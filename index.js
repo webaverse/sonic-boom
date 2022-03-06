@@ -1322,6 +1322,9 @@ export default () => {
                     if(vId>=23.99){
                         gl_FragColor.a*=((vId*vId)/(sphereNum*sphereNum))*0.9;
                     }
+                    if(vId<23.99){
+                        gl_FragColor.a*=0.1*((vId*vId)/(sphereNum*sphereNum));
+                    }
                     if(vId>=43.99){
                         gl_FragColor.a*=((vId*vId)/(sphereNum*sphereNum))*0.6;
                     }
