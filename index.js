@@ -18,6 +18,7 @@ export default () => {
   const textureR = textureLoader.load(`${baseUrl}/textures/r.jpg`);
   const textureG = textureLoader.load(`${baseUrl}/textures/g.jpg`);
   const textureB = textureLoader.load(`${baseUrl}/textures/b.jpg`);
+  const electronicballTexture = textureLoader.load(`${baseUrl}/textures/electronic-ball2.png`);
     //################################################ trace narutoRun Time ########################################
     {
         useFrame(() => {
@@ -748,10 +749,10 @@ export default () => {
     {
         const planeGeometry = new THREE.BufferGeometry();
         let planeNumber=100;
-        let position= new Float32Array(1800);
+        let position= new Float32Array(18*planeNumber);
         planeGeometry.setAttribute('position', new THREE.BufferAttribute(position, 3));
 
-        let uv = new Float32Array(1200);
+        let uv = new Float32Array(12*planeNumber);
         let fraction = 1;
         let ratio = 1 / planeNumber;
         for (let i = 0; i < planeNumber; i++) {
@@ -963,10 +964,10 @@ export default () => {
     {
         const planeGeometry = new THREE.BufferGeometry();
         const planeNumber=100;
-        let position= new Float32Array(1800);
+        let position= new Float32Array(18*planeNumber);
         planeGeometry.setAttribute('position', new THREE.BufferAttribute(position, 3));
 
-        let uv = new Float32Array(1200);
+        let uv = new Float32Array(12*planeNumber);
         let fraction = 1;
         let ratio = 1 / planeNumber;
         for (let i = 0; i < planeNumber; i++) {
@@ -1555,7 +1556,7 @@ export default () => {
         const electricityGeometry2 = new THREE.PlaneBufferGeometry(1.6, 1.6);
         const instGeom = new THREE.InstancedBufferGeometry().copy(electricityGeometry2);
 
-        const num = 20;
+        const num = 40;
         let instPos = []; 
         let instId = []; 
         let instAngle = []; 
@@ -1718,6 +1719,429 @@ export default () => {
             
             app.updateMatrixWorld();
         
+        });
+    }
+    //#################################### particle behind avatar 1 ###############################
+    {
+
+        const group=new THREE.Group();
+        const particleCount = 2;
+        let info = {
+            velocity: [particleCount],
+            rotate: [particleCount]
+        }
+        const acc = new THREE.Vector3(0, -0, 0);
+    
+        //######## object #########
+        let mesh = null;
+        let dummy = new THREE.Object3D();
+    
+    
+        function addInstancedMesh() {
+            mesh = new THREE.InstancedMesh(new THREE.PlaneGeometry(0.3, 0.3), new THREE.MeshBasicMaterial({color:0x2167F2,map:electronicballTexture, transparent:true, depthWrite:false, opacity:0.5, blending:THREE.AdditiveBlending, side:THREE.DoubleSide}), particleCount);
+            group.add(mesh);
+            app.add(group);
+            setInstancedMeshPositions(mesh);
+        }
+        
+        let matrix = new THREE.Matrix4();
+        let position = new THREE.Vector3();
+        function setInstancedMeshPositions(mesh1) {
+            for (let i = 0; i < mesh1.count; i++) {
+                
+                mesh.getMatrixAt(i, matrix);
+                dummy.scale.x = .00001;
+                dummy.scale.y = .00001;
+                dummy.scale.z = .00001;
+                dummy.position.x = (Math.random())*0.2;
+                dummy.position.y = -0.2;
+                dummy.position.z = Math.random()*10;
+                info.velocity[i] = (new THREE.Vector3(
+                    0,
+                    0,
+                    1));
+                info.velocity[i].divideScalar(20);
+                info.rotate[i] = new THREE.Vector3(
+                    Math.random() - 0.5,
+                    Math.random() - 0.5,
+                    Math.random() - 0.5);
+                dummy.updateMatrix();
+                mesh1.setMatrixAt(i, dummy.matrix);
+            }
+            mesh1.instanceMatrix.needsUpdate = true;
+        }
+        addInstancedMesh();
+    
+        
+        let dum = new THREE.Vector3();
+        let originPoint = new THREE.Vector3(0,0,0);
+        useFrame(({timestamp}) => {
+            group.position.copy(localPlayer.position);
+            group.rotation.copy(localPlayer.rotation);
+            if (localPlayer.avatar) {
+              group.position.y -= localPlayer.avatar.height;
+              group.position.y += 0.65;
+            }
+            localPlayer.getWorldDirection(dum)
+            dum = dum.normalize();
+        
+            if (mesh) {
+                for (let i = 0; i < particleCount; i++) {
+                    mesh.getMatrixAt(i, matrix);
+                    position.setFromMatrixPosition(matrix); 
+                    matrix.decompose(dummy.position, dummy.quaternion, dummy.scale);
+                    
+                
+        
+                    if (dummy.position.distanceTo(originPoint)>5) {
+                    
+                        if(narutoRunTime>0){
+                            dummy.scale.x = .5;
+                            dummy.scale.y = .5;
+                            dummy.scale.z = .5;
+                        }
+                        else{
+                            dummy.scale.x = .00001;
+                            dummy.scale.y = .00001;
+                            dummy.scale.z = .00001;
+                        }
+                            
+                        
+                        dummy.position.x = (Math.random()-0.5)*0.2;
+                        dummy.position.y = (Math.random()-0.5)*0.2;
+                        dummy.position.z = 0;
+                        info.velocity[i].x=(Math.random()-0.5)*4;
+                        info.velocity[i].y=(Math.random()-0.5)*4;
+                        info.velocity[i].z=10+Math.random();
+                        info.velocity[i].divideScalar(20);
+                    }
+                    
+                        dummy.scale.x/=1.04;
+                        dummy.scale.y/=1.04;
+                        dummy.scale.z/=1.04;
+                        
+                        if(narutoRunTime==0){
+                            dummy.scale.x /= 1.1;
+                            dummy.scale.y /= 1.1;
+                            dummy.scale.z /= 1.1;
+                        }
+                        dummy.rotation.copy(camera.rotation);
+                        if(localPlayer.rotation.x==0){
+                            dummy.rotation.y-=localPlayer.rotation.y;
+                        }
+                        else{
+                            dummy.rotation.y+=localPlayer.rotation.y;
+                        }
+                        
+                        info.velocity[i].add(acc);
+                        dummy.position.add(info.velocity[i]);
+                        dummy.updateMatrix();
+                        
+                        mesh.setMatrixAt(i, dummy.matrix);
+                        mesh.instanceMatrix.needsUpdate = true;
+        
+                }
+            }
+        group.updateMatrixWorld();
+        
+        });
+      }
+      //#################################### particle behind avatar 2 ###############################
+      {
+
+        const group=new THREE.Group();
+        const particleCount = 2;
+        let info = {
+            velocity: [particleCount],
+            rotate: [particleCount]
+        }
+        const acc = new THREE.Vector3(0, -0, 0);
+    
+        //######## object #########
+        let mesh = null;
+        let dummy = new THREE.Object3D();
+    
+    
+        function addInstancedMesh() {
+            mesh = new THREE.InstancedMesh(new THREE.PlaneGeometry(0.3, 0.3), new THREE.MeshBasicMaterial({map:electronicballTexture, transparent:true, depthWrite:false, opacity:0.5, blending:THREE.AdditiveBlending, side:THREE.DoubleSide}), particleCount);
+            group.add(mesh);
+            app.add(group);
+            setInstancedMeshPositions(mesh);
+        }
+        
+        let matrix = new THREE.Matrix4();
+        let position = new THREE.Vector3();
+        function setInstancedMeshPositions(mesh1) {
+            for (let i = 0; i < mesh1.count; i++) {
+                
+                mesh.getMatrixAt(i, matrix);
+                dummy.scale.x = .00001;
+                dummy.scale.y = .00001;
+                dummy.scale.z = .00001;
+                
+                dummy.position.x = (Math.random())*0.2;
+                dummy.position.y = -0.2;
+                dummy.position.z = Math.random()*10;
+                info.velocity[i] = (new THREE.Vector3(
+                    0,
+                    0,
+                    1));
+                info.velocity[i].divideScalar(20);
+                info.rotate[i] = new THREE.Vector3(
+                    Math.random() - 0.5,
+                    Math.random() - 0.5,
+                    Math.random() - 0.5);
+                dummy.updateMatrix();
+                mesh1.setMatrixAt(i, dummy.matrix);
+            }
+            mesh1.instanceMatrix.needsUpdate = true;
+        }
+        addInstancedMesh();
+    
+        
+        let dum = new THREE.Vector3();
+        let originPoint = new THREE.Vector3(0,0,0);
+        useFrame(({timestamp}) => {
+            group.position.copy(localPlayer.position);
+            group.rotation.copy(localPlayer.rotation);
+            if (localPlayer.avatar) {
+              group.position.y -= localPlayer.avatar.height;
+              group.position.y += 0.65;
+            }
+            localPlayer.getWorldDirection(dum)
+            dum = dum.normalize();
+        
+            if (mesh) {
+                for (let i = 0; i < particleCount; i++) {
+                    mesh.getMatrixAt(i, matrix);
+                    position.setFromMatrixPosition(matrix);
+                    matrix.decompose(dummy.position, dummy.quaternion, dummy.scale);
+                    //dummy.rotation.y = timestamp/1000 * i ;
+                
+        
+                    if (dummy.position.distanceTo(originPoint)>5) {
+                    
+                        if(narutoRunTime>0){
+                            dummy.scale.x = .5;
+                            dummy.scale.y = .5;
+                            dummy.scale.z = .5;
+                        }
+                        else{
+                            dummy.scale.x = .00001;
+                            dummy.scale.y = .00001;
+                            dummy.scale.z = .00001;
+                        }
+                            
+                        
+                        dummy.position.x = (Math.random()-0.5)*0.2;
+                        dummy.position.y = (Math.random()-0.5)*0.2;
+                        dummy.position.z = 0;
+                        info.velocity[i].x=(Math.random()-0.5)*3;
+                        info.velocity[i].y=(Math.random()-0.5)*3;
+                        info.velocity[i].z=8+Math.random();
+                        info.velocity[i].divideScalar(20);
+                    }
+                    
+                        dummy.scale.x/=1.04;
+                        dummy.scale.y/=1.04;
+                        dummy.scale.z/=1.04;
+                        if(narutoRunTime==0){
+                            dummy.scale.x /= 1.1;
+                            dummy.scale.y /= 1.1;
+                            dummy.scale.z /= 1.1;
+                        }
+                        dummy.rotation.copy(camera.rotation);
+                        if(localPlayer.rotation.x==0){
+                            dummy.rotation.y-=localPlayer.rotation.y;
+                        }
+                        else{
+                            dummy.rotation.y+=localPlayer.rotation.y;
+                        }
+                        info.velocity[i].add(acc);
+                        dummy.position.add(info.velocity[i]);
+                        dummy.updateMatrix();
+                        
+                        mesh.setMatrixAt(i, dummy.matrix);
+                        mesh.instanceMatrix.needsUpdate = true;
+        
+                }
+            }
+        group.updateMatrixWorld();
+        
+        });
+      }
+    //#################################### shockwave2 ########################################
+    {
+        const localVector = new THREE.Vector3();
+        const _shake = () => {
+            if (narutoRunTime >= 1 && narutoRunTime <= 5) {
+                localVector.setFromMatrixPosition(localPlayer.matrixWorld);
+                cameraManager.addShake( localVector, 0.2, 30, 500);
+            }
+        };
+        let wave;
+        let group = new THREE.Group();
+        (async () => {
+            const u = `${baseUrl}/assets/wave3.glb`;
+            wave = await new Promise((accept, reject) => {
+                const {gltfLoader} = useLoaders();
+                gltfLoader.load(u, accept, function onprogress() {}, reject);
+                
+            });
+            wave.scene.position.y+=0.05;
+            wave.scene.position.y=-5000;
+            wave.scene.rotation.x=Math.PI/2;
+            group.add(wave.scene);
+            app.add(group);
+            
+            wave.scene.children[0].material= new THREE.ShaderMaterial({
+                uniforms: {
+                    uTime: {
+                        value: 0,
+                    },
+                    opacity: {
+                        value: 0,
+                    },
+                    avatarPos:{
+                        value: new THREE.Vector3(0,0,0)
+                    },
+                    iResolution: { value: new THREE.Vector3() },
+                },
+                vertexShader: `\
+                    
+                    ${THREE.ShaderChunk.common}
+                    ${THREE.ShaderChunk.logdepthbuf_pars_vertex}
+                
+                
+                    uniform float uTime;
+            
+                    varying vec2 vUv;
+                    varying vec3 vPos;
+
+                
+                    void main() {
+                    vUv=uv;
+                    vPos=position;
+                    vec4 modelPosition = modelMatrix * vec4(position, 1.0);
+                    vec4 viewPosition = viewMatrix * modelPosition;
+                    vec4 projectionPosition = projectionMatrix * viewPosition;
+            
+                    gl_Position = projectionPosition;
+                    ${THREE.ShaderChunk.logdepthbuf_vertex}
+                    }
+                `,
+                fragmentShader: `\
+                    ${THREE.ShaderChunk.logdepthbuf_pars_fragment}
+                    uniform float uTime;
+                    uniform float opacity;
+                    uniform vec3 iResolution;
+                    uniform vec3 avatarPos;
+                    varying vec2 vUv;
+                    varying vec3 vPos;
+
+                    float noise(vec3 point) { 
+                        float r = 0.; 
+                        for (int i=0;i<16;i++) {
+                            vec3 D, p = point + mod(vec3(i,i/4,i/8) , vec3(4.0,2.0,2.0)) +
+                            1.7*sin(vec3(i,5*i,8*i)), C=floor(p), P=p-C-.5, A=abs(P);
+                            C += mod(C.x+C.y+C.z,2.) * step(max(A.yzx,A.zxy),A) * sign(P);
+                            D=34.*sin(987.*float(i)+876.*C+76.*C.yzx+765.*C.zxy);P=p-C-.5;
+                            r+=sin(6.3*dot(P,fract(D)-.5))*pow(max(0.,1.-2.*dot(P,P)),4.);
+                        } 
+                        return .5 * sin(r); 
+                    }
+                    
+                    void mainImage( out vec4 fragColor, in vec2 fragCoord ){
+                        
+                        fragColor = vec4(
+                            mix(vec3(0.205, 0.350, 0.930),vec3(0.205, 0.550, 0.530),vUv.x)
+                            +vec3(
+                                noise(5.6*vec3(vPos.z*sin(mod(uTime*1.,1.)/0.9),vPos.z,vPos.x*cos(mod(uTime*1.,1.)/0.9)))
+                            )
+                            , distance(avatarPos,vPos)-.95);
+                            //pow(distance(avatarPos,vPos)-.95,1.)
+
+                            // vec2 u = vPos.xz*10.;
+        
+                            // vec2 s = vec2(1.,1.732);
+                            // vec2 a = mod(u     ,s)*2.-s;
+                            // vec2 b = mod(u+s*.5,s)*2.-s;
+                            
+                            // fragColor = vec4(.2*min(dot(a,a),dot(b,b)));
+
+
+                            
+                        
+                    }
+                    
+                    void main() {
+                        mainImage(gl_FragColor, vUv * iResolution.xy);
+                        gl_FragColor.a*=1.5;
+                        gl_FragColor.a-=opacity;
+                        //gl_FragColor.xyz*=10.;
+                    ${THREE.ShaderChunk.logdepthbuf_fragment}
+                    }
+                `,
+                //side: THREE.DoubleSide,
+                transparent: true,
+                depthWrite: false,
+                blending: THREE.AdditiveBlending,
+            });
+
+
+        })();
+
+        app.updateMatrixWorld();
+
+        useFrame(({timestamp}) => {
+            /* localPlayer.getWorldDirection(localVector)
+            localVector.normalize(); */
+
+            if (wave) {
+                if (narutoRunTime > 0) {
+                    // if(wave.scene.scale.x>5){
+                    //     // wave.scene.scale.set(10,10,10);
+                    //     // wave.scene.position.y=-5000;
+                    // }
+                    // else{
+                        wave.scene.scale.set(wave.scene.scale.x+.1,wave.scene.scale.y+0.0005,wave.scene.scale.z+.1);
+                        if(narutoRunTime ===1){
+                            group.position.copy(localPlayer.position);
+                            localPlayer.getWorldDirection(localVector);
+                            localVector.normalize();
+                            group.position.x-=0.2*localVector.x;
+                            group.position.z-=0.2*localVector.z;
+                            group.rotation.copy(localPlayer.rotation);
+                            wave.scene.position.y=-1.;
+                        }
+                        
+                        if(wave.scene.scale.x<=5){
+                            _shake();
+                            
+                        }
+                        else{
+                            wave.scene.children[0].material.uniforms.opacity.value+=0.005;
+                        }
+                        
+                    //}
+                    
+                    
+                }
+                else{
+                    wave.scene.scale.set(1,1,1);
+                    wave.scene.position.y=-5000;
+                    wave.scene.children[0].material.uniforms.opacity.value=0;
+                }
+
+                wave.scene.children[0].material.uniforms.uTime.value=timestamp/1000;
+                wave.scene.children[0].material.uniforms.iResolution.value.set(window.innerWidth, window.innerHeight, 1);
+                wave.scene.children[0].material.uniforms.avatarPos.x=localPlayer.position.x;
+                wave.scene.children[0].material.uniforms.avatarPos.y=localPlayer.position.y;
+                wave.scene.children[0].material.uniforms.avatarPos.z=localPlayer.position.z;
+            }
+            
+            
+            app.updateMatrixWorld();
         });
     }
     //########################################## flame ##########################################
@@ -2002,9 +2426,9 @@ export default () => {
 
     //     });
     // }
-    //########################################### electronic ball #############################################
+    //########################################### particle #############################################
     
-    {
+    //{
         // const electronicball = new Electronicball();
         // app.add(electronicball);
         // app.add(electronicball.batchRenderer);
@@ -2071,7 +2495,7 @@ export default () => {
            
         
         // });
-    }
+    //}
     
     
   
@@ -2215,180 +2639,7 @@ export default () => {
 //     });
 //   }
 
-  //#################################### shockwave2 ########################################
-  {
-    const localVector = new THREE.Vector3();
-    const _shake = () => {
-        if (narutoRunTime >= 1 && narutoRunTime <= 5) {
-            localVector.setFromMatrixPosition(localPlayer.matrixWorld);
-            cameraManager.addShake( localVector, 0.2, 30, 500);
-        }
-    };
-    let wave;
-    let group = new THREE.Group();
-    (async () => {
-        const u = `${baseUrl}/assets/wave3.glb`;
-        wave = await new Promise((accept, reject) => {
-            const {gltfLoader} = useLoaders();
-            gltfLoader.load(u, accept, function onprogress() {}, reject);
-            
-        });
-        wave.scene.position.y+=0.05;
-        wave.scene.position.y=-5000;
-        wave.scene.rotation.x=Math.PI/2;
-        group.add(wave.scene);
-        app.add(group);
-        
-        wave.scene.children[0].material= new THREE.ShaderMaterial({
-            uniforms: {
-                uTime: {
-                    value: 0,
-                },
-                opacity: {
-                    value: 0,
-                },
-                avatarPos:{
-                    value: new THREE.Vector3(0,0,0)
-                },
-                iResolution: { value: new THREE.Vector3() },
-            },
-            vertexShader: `\
-                 
-                ${THREE.ShaderChunk.common}
-                ${THREE.ShaderChunk.logdepthbuf_pars_vertex}
-               
-             
-                uniform float uTime;
-        
-                varying vec2 vUv;
-                varying vec3 vPos;
-
-               
-                void main() {
-                  vUv=uv;
-                  vPos=position;
-                  vec4 modelPosition = modelMatrix * vec4(position, 1.0);
-                  vec4 viewPosition = viewMatrix * modelPosition;
-                  vec4 projectionPosition = projectionMatrix * viewPosition;
-        
-                  gl_Position = projectionPosition;
-                  ${THREE.ShaderChunk.logdepthbuf_vertex}
-                }
-              `,
-            fragmentShader: `\
-                ${THREE.ShaderChunk.logdepthbuf_pars_fragment}
-                uniform float uTime;
-                uniform float opacity;
-                uniform vec3 iResolution;
-                uniform vec3 avatarPos;
-                varying vec2 vUv;
-                varying vec3 vPos;
-
-                float noise(vec3 point) { 
-                    float r = 0.; 
-                    for (int i=0;i<16;i++) {
-                        vec3 D, p = point + mod(vec3(i,i/4,i/8) , vec3(4.0,2.0,2.0)) +
-                        1.7*sin(vec3(i,5*i,8*i)), C=floor(p), P=p-C-.5, A=abs(P);
-                        C += mod(C.x+C.y+C.z,2.) * step(max(A.yzx,A.zxy),A) * sign(P);
-                        D=34.*sin(987.*float(i)+876.*C+76.*C.yzx+765.*C.zxy);P=p-C-.5;
-                        r+=sin(6.3*dot(P,fract(D)-.5))*pow(max(0.,1.-2.*dot(P,P)),4.);
-                    } 
-                    return .5 * sin(r); 
-                }
-                
-                void mainImage( out vec4 fragColor, in vec2 fragCoord ){
-                    
-                    fragColor = vec4(
-                        mix(vec3(0.205, 0.350, 0.930),vec3(0.205, 0.550, 0.530),vUv.x)
-                        +vec3(
-                            noise(5.6*vec3(vPos.z*sin(mod(uTime*1.,1.)/0.9),vPos.z,vPos.x*cos(mod(uTime*1.,1.)/0.9)))
-                        )
-                        , distance(avatarPos,vPos)-.95);
-                        //pow(distance(avatarPos,vPos)-.95,1.)
-
-                        // vec2 u = vPos.xz*10.;
-    
-                        // vec2 s = vec2(1.,1.732);
-                        // vec2 a = mod(u     ,s)*2.-s;
-                        // vec2 b = mod(u+s*.5,s)*2.-s;
-                        
-                        // fragColor = vec4(.2*min(dot(a,a),dot(b,b)));
-
-
-                        
-                    
-                }
-                
-                void main() {
-                    mainImage(gl_FragColor, vUv * iResolution.xy);
-                    gl_FragColor.a*=1.5;
-                    gl_FragColor.a-=opacity;
-                    //gl_FragColor.xyz*=10.;
-                  ${THREE.ShaderChunk.logdepthbuf_fragment}
-                }
-              `,
-            //side: THREE.DoubleSide,
-            transparent: true,
-            depthWrite: false,
-            blending: THREE.AdditiveBlending,
-        });
-
-
-    })();
-
-    app.updateMatrixWorld();
-
-    useFrame(({timestamp}) => {
-        /* localPlayer.getWorldDirection(localVector)
-        localVector.normalize(); */
-
-        if (wave) {
-            if (narutoRunTime > 0) {
-                // if(wave.scene.scale.x>5){
-                //     // wave.scene.scale.set(10,10,10);
-                //     // wave.scene.position.y=-5000;
-                // }
-                // else{
-                    wave.scene.scale.set(wave.scene.scale.x+.1,wave.scene.scale.y+0.0005,wave.scene.scale.z+.1);
-                    if(narutoRunTime ===1){
-                        group.position.copy(localPlayer.position);
-                        localPlayer.getWorldDirection(localVector);
-                        localVector.normalize();
-                        group.position.x-=0.2*localVector.x;
-                        group.position.z-=0.2*localVector.z;
-                        group.rotation.copy(localPlayer.rotation);
-                        wave.scene.position.y=-1.;
-                    }
-                    
-                    if(wave.scene.scale.x<=5){
-                        _shake();
-                        
-                    }
-                    else{
-                        wave.scene.children[0].material.uniforms.opacity.value+=0.005;
-                    }
-                    
-                //}
-                
-                 
-            }
-            else{
-                wave.scene.scale.set(1,1,1);
-                wave.scene.position.y=-5000;
-                wave.scene.children[0].material.uniforms.opacity.value=0;
-            }
-
-            wave.scene.children[0].material.uniforms.uTime.value=timestamp/1000;
-            wave.scene.children[0].material.uniforms.iResolution.value.set(window.innerWidth, window.innerHeight, 1);
-            wave.scene.children[0].material.uniforms.avatarPos.x=localPlayer.position.x;
-            wave.scene.children[0].material.uniforms.avatarPos.y=localPlayer.position.y;
-            wave.scene.children[0].material.uniforms.avatarPos.z=localPlayer.position.z;
-        }
-        
-        
-        app.updateMatrixWorld();
-    });
-  }
+  
 
   
   app.setComponent('renderPriority', 'low');
