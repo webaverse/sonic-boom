@@ -1323,7 +1323,7 @@ export default () => {
                         gl_FragColor.a*=((vId*vId)/(sphereNum*sphereNum))*0.9;
                     }
                     if(vId<23.99){
-                        gl_FragColor.a*=0.5*((vId*vId)/(sphereNum*sphereNum));
+                        gl_FragColor.a*=0.4*((vId*vId)/(sphereNum*sphereNum));
                     }
                     if(vId>=43.99){
                         gl_FragColor.a*=((vId*vId)/(sphereNum*sphereNum))*0.6;
@@ -1360,7 +1360,7 @@ export default () => {
             }
            
             if(narutoRunTime==0){
-                mainballMaterial.uniforms.opacity.value/=1.2;
+                mainballMaterial.uniforms.opacity.value/=1.05;
                 mainballMaterial.uniforms.size.value/=1.01;
             }
             else if(narutoRunTime==1){
