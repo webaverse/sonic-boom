@@ -882,9 +882,10 @@ export default () => {
       app.add(plane);
       plane.position.y=1;
       plane.frustumCulled = false;
-    
+      let temp=[];
+      let temp2=[];
       useFrame(({timestamp}) => {
-        let temp=[];
+        
         for(let i=0;i<18;i++){
             temp[i]=position[i];
         }
@@ -905,17 +906,17 @@ export default () => {
                     position[4] += 1.18;
                 }
             
-                position[6] = position[18];
-                position[7] = position[19];
-                position[8] = position[20];
+                position[6] = temp[0];
+                position[7] = temp[1];
+                position[8] = temp[2];
             
-                position[9] = position[21];
-                position[10] = position[22];
-                position[11] = position[23];
+                position[9] = temp[3];
+                position[10] = temp[4];
+                position[11] = temp[5];
             
-                position[12] = position[18];
-                position[13] = position[19];
-                position[14] = position[20];
+                position[12] = temp[0];
+                position[13] = temp[1];
+                position[14] = temp[2];
             
                 position[15] = localPlayer.position.x;
                 position[16] = localPlayer.position.y-2.;
@@ -926,7 +927,7 @@ export default () => {
                 }
             }
             else{
-                let temp2=[];
+                
                 for(let j=0;j<18;j++){
                     temp2[j]=position[i*18+j];
                     position[i*18+j]=temp[j];
@@ -1107,10 +1108,11 @@ export default () => {
       app.add( point2 );
 
       const localVector = new THREE.Vector3();
-   
+      let temp=[];
+      let temp2=[];
       useFrame(({timestamp}) => {
         
-       if(localPlayer.rotation.x!==0){
+        if(localPlayer.rotation.x!==0){
             point1.position.copy(localPlayer.position);
             point1.rotation.copy(localPlayer.rotation);
             
@@ -1134,8 +1136,8 @@ export default () => {
             localVector.normalize();
             point2.position.x+=0.6*localVector.x;
             point2.position.z+=0.6*localVector.z;
-       }
-       else{
+        }
+        else{
             point1.position.copy(localPlayer.position);
             point1.rotation.copy(localPlayer.rotation);
             
@@ -1159,8 +1161,8 @@ export default () => {
             localVector.normalize();
             point2.position.x+=0.6*localVector.x;
             point2.position.z+=0.6*localVector.z;
-       }
-       let temp=[];
+        }
+       
         for(let i=0;i<18;i++){
             temp[i]=position[i];
         }
@@ -1181,17 +1183,17 @@ export default () => {
                     position[4] += 1.18;
                 }
             
-                position[6] = position[18];
-                position[7] = position[19];
-                position[8] = position[20];
+                position[6] = temp[0];
+                position[7] = temp[1];
+                position[8] = temp[2];
             
-                position[9] = position[21];
-                position[10] = position[22];
-                position[11] = position[23];
+                position[9] = temp[3];
+                position[10] = temp[4];
+                position[11] = temp[5];
             
-                position[12] = position[18];
-                position[13] = position[19];
-                position[14] = position[20];
+                position[12] = temp[0];
+                position[13] = temp[1];
+                position[14] = temp[2];
             
                 position[15] = point2.position.x;
                 position[16] = localPlayer.position.y-1.55;
@@ -1202,7 +1204,7 @@ export default () => {
                 }
             }
             else{
-                let temp2=[];
+                
                 for(let j=0;j<18;j++){
                     temp2[j]=position[i*18+j];
                     position[i*18+j]=temp[j];
@@ -1520,6 +1522,7 @@ export default () => {
            
             if(narutoRunTime==0){
                 electricityMaterial.uniforms.opacity.value-=0.02;
+                electricityMaterial.uniforms.size.value/=1.01;
             }
             else if(narutoRunTime==1){
                 electricityMaterial.uniforms.opacity.value=1;
@@ -1549,7 +1552,7 @@ export default () => {
     }
     //##################################### electricity2 ##################################################
     {
-        const electricityGeometry2 = new THREE.PlaneBufferGeometry(1.8, 1.8);
+        const electricityGeometry2 = new THREE.PlaneBufferGeometry(1.6, 1.6);
         const instGeom = new THREE.InstancedBufferGeometry().copy(electricityGeometry2);
 
         const num = 20;
@@ -1686,6 +1689,7 @@ export default () => {
            
             if(narutoRunTime==0){
                 electricityMaterial.uniforms.opacity.value-=0.02;
+                electricityMaterial.uniforms.size.value/=1.01;
             }
             else if(narutoRunTime==1){
                 electricityMaterial.uniforms.opacity.value=1;
