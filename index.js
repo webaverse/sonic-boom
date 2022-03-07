@@ -2112,8 +2112,8 @@ export default () => {
                             group.position.copy(localPlayer.position);
                             localPlayer.getWorldDirection(localVector);
                             localVector.normalize();
-                            group.position.x-=0.2*localVector.x;
-                            group.position.z-=0.2*localVector.z;
+                            group.position.x-=9.2*localVector.x;
+                            group.position.z-=9.2*localVector.z;
                             group.rotation.copy(localPlayer.rotation);
                             wave.scene.position.y=-1.;
                         }
