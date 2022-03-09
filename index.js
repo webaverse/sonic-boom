@@ -1257,14 +1257,6 @@ export default () => {
         }
         particlesGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3))
 
-        const rotation = new Float32Array(count)
-
-        for(let i = 0; i < count; i++)
-        {
-            rotation[i] = Math.random()*90;
-        }
-        particlesGeometry.setAttribute('aRotation', new THREE.BufferAttribute(rotation, 1))
-
         const particlesMaterial = new THREE.ShaderMaterial({
             uniforms: {
                 opacity: {
@@ -1278,6 +1270,9 @@ export default () => {
                 },
                 uAvatarPos:{
                     value: new THREE.Vector3(0,0,0)
+                },
+                uCameraFov:{
+                    value: 1
                 }
 
             },
@@ -1288,16 +1283,16 @@ export default () => {
                 
                 uniform float uPixelRatio;
                 uniform float uSize;
+                uniform float uCameraFov;
                 
                 varying vec2 vUv;
-                varying float vRotation;
                 varying vec3 vPos;
                 
                 void main() { 
-                gl_PointSize = (1000.* uPixelRatio)*uSize;
-                vec3 pos=position;
-                
-                vec4 modelPosition = modelMatrix * vec4(pos, 1.0);
+                gl_PointSize = (1000.)*uSize;
+                if(uCameraFov>1.)
+                    gl_PointSize /= (uCameraFov*1.2);
+                vec4 modelPosition = modelMatrix * vec4(position, 1.0);
                 vPos=modelPosition.xyz;
                 vec4 viewPosition = viewMatrix * modelPosition;
                 vec4 projectionPosition = projectionMatrix * viewPosition;
@@ -1339,24 +1334,22 @@ export default () => {
             transparent: true,
             depthWrite: false,
             blending: THREE.AdditiveBlending,
-            
         });
         
 
         const mainBall = new THREE.Points(particlesGeometry, particlesMaterial);
-        const group = new THREE.Group();
-        group.add(mainBall);
-        app.add(group);
+        mainBall.material.sizeAttenuation= false;
+        app.add(mainBall);
         app.updateMatrixWorld();
         
         
         useFrame(({timestamp}) => {
-            
-            group.position.copy(localPlayer.position);
-            group.rotation.copy(localPlayer.rotation);
+            //console.log(camera.fov)
+            mainBall.position.copy(localPlayer.position);
+            //mainBall.rotation.copy(localPlayer.rotation);
             if (localPlayer.avatar) {
-                group.position.y -= localPlayer.avatar.height;
-                group.position.y += 0.65;
+                mainBall.position.y -= localPlayer.avatar.height;
+                mainBall.position.y += 0.65;
             }
             if(narutoRunTime>0){
                 if(narutoRunTime===1){
@@ -1370,22 +1363,23 @@ export default () => {
                         mainBall.material.uniforms.uSize.value=1;
                     }
                 }
-                group.scale.x=1;
-                group.scale.y=1;
-                group.scale.z=1;
+                mainBall.scale.x=1;
+                mainBall.scale.y=1;
+                mainBall.scale.z=1;
                 mainBall.material.uniforms.opacity.value=0;
             }
             else{
-                group.scale.x-=0.1;
-                group.scale.y-=0.1;
-                group.scale.z-=0.1;
+                mainBall.scale.x-=0.1;
+                mainBall.scale.y-=0.1;
+                mainBall.scale.z-=0.1;
                 mainBall.material.uniforms.opacity.value+=0.02;
             }
             
 
            
-            mainBall.material.uniforms.uAvatarPos.value=group.position;
-            group.updateMatrixWorld();
+            mainBall.material.uniforms.uAvatarPos.value=mainBall.position;
+            mainBall.material.uniforms.uCameraFov.value=camera.fov/60;
+            app.updateMatrixWorld();
            
         });
     }
