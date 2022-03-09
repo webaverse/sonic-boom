@@ -1376,7 +1376,7 @@ export default () => {
 
            
             mainBall.material.uniforms.uAvatarPos.value=mainBall.position;
-            mainBall.material.uniforms.uCameraFov.value=Math.pow(60/camera.fov,1.3);
+            mainBall.material.uniforms.uCameraFov.value=Math.pow(60/camera.fov,1.45);
             app.updateMatrixWorld();
            
         });
