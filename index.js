@@ -437,6 +437,7 @@ export default () => {
                 }
                 gl_FragColor *= vec4(smoothstep(0.2,0.628,vUv.y));
                 gl_FragColor.xyz/=1.5;
+                gl_FragColor.a*=(1.-vUv.y)*5.;
                 //gl_FragColor.a/=2.;
                 ${THREE.ShaderChunk.logdepthbuf_fragment}
                 
@@ -507,7 +508,7 @@ export default () => {
             }
             else{
                 //group.scale.set(0,0,0);
-                flameMaterial.uniforms.strength.value-=0.015;
+                flameMaterial.uniforms.strength.value-=0.025;
             }
             // if(narutoRunTime>0 && narutoRunTime<90){
             //     group.scale.set(0,0,0);
@@ -627,6 +628,7 @@ export default () => {
                     gl_FragColor = vec4(0.);
                 }
                 gl_FragColor *= vec4(smoothstep(0.2,0.628,vUv.y));
+                gl_FragColor.a*=(1.-vUv.y)*5.;
                 //gl_FragColor.a*=cos(uTime*10.);
                 ${THREE.ShaderChunk.logdepthbuf_fragment}
                 
@@ -702,7 +704,7 @@ export default () => {
             }
             else{
                 //group.scale.set(0,0,0);
-                lightningMaterial.uniforms.strength.value-=0.015;
+                lightningMaterial.uniforms.strength.value-=0.025;
             }
             // if(narutoRunTime>0 && narutoRunTime<90){
             //     group.scale.set(0,0,0);
@@ -1236,157 +1238,158 @@ export default () => {
       
       });
     }
-    //##################################### main ball ##################################################
+    //##################################### mainBall ####################################################
     {
-        
-        const mainBallGeometry = new THREE.SphereBufferGeometry(1.9, 32,32);
-        const instGeom = new THREE.InstancedBufferGeometry().copy(mainBallGeometry);
+        const particlesGeometry = new THREE.BufferGeometry()
+        const count = 50;
 
-        const num = 60;
-        let instPos = []; 
-        let instId = []; 
-        let instAngle = []; 
-        for (let i = 0; i < num; i++) {
-            instPos.push(0, 0, 0);
-            instId.push(i);
-            instAngle.push(0, 0, 0);
+        const positions = new Float32Array(count * 3)
+
+        for(let i = 0; i < count; i++) 
+        {
+            var theta = THREE.Math.randFloatSpread(360); 
+            var phi = THREE.Math.randFloatSpread(360); 
+
+            positions[i * 3 + 0] = 0.1*Math.sin(theta) * Math.cos(phi);
+            positions[i * 3 + 1] = 0.1*Math.sin(theta) * Math.sin(phi);
+            positions[i * 3 + 2] = 0.1*Math.cos(theta);
+
         }
-        instGeom.setAttribute("instPos", new THREE.InstancedBufferAttribute(new Float32Array(instPos), 3));
-        instGeom.setAttribute("instId", new THREE.InstancedBufferAttribute(new Float32Array(instId), 1));
-        instGeom.setAttribute("instAngle", new THREE.InstancedBufferAttribute(new Float32Array(instAngle), 3));
-        instGeom.instanceCount = num;
+        particlesGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3))
 
+        const rotation = new Float32Array(count)
 
-        const mainballMaterial = new THREE.ShaderMaterial({
+        for(let i = 0; i < count; i++)
+        {
+            rotation[i] = Math.random()*90;
+        }
+        particlesGeometry.setAttribute('aRotation', new THREE.BufferAttribute(rotation, 1))
+
+        const particlesMaterial = new THREE.ShaderMaterial({
             uniforms: {
-                sphereNum: { value: num },
-                uTime: { value: 0 },
-                random: { value: 0 },
-                opacity: { value: 0 },
-                size: { value: 1 }
+                opacity: {
+                    value: 0,
+                },
+                uPixelRatio: { 
+                    value: Math.min(window.devicePixelRatio, 2) 
+                },
+                uSize: { 
+                    value: 1 
+                },
+                uAvatarPos:{
+                    value: new THREE.Vector3(0,0,0)
+                }
+
             },
-            vertexShader: `
+            vertexShader: `\
+                
                 ${THREE.ShaderChunk.common}
                 ${THREE.ShaderChunk.logdepthbuf_pars_vertex}
-                uniform float uTime;
-                uniform float size;
-                uniform float sphereNum;
-
-                attribute vec3 instPos;
-                attribute vec3 instAngle;
-                attribute float instId;
-            
+                
+                uniform float uPixelRatio;
+                uniform float uSize;
+                
                 varying vec2 vUv;
-                varying float vId;
+                varying float vRotation;
+                varying vec3 vPos;
                 
+                void main() { 
+                gl_PointSize = (1000.* uPixelRatio)*uSize;
+                vec3 pos=position;
                 
-                void main() {
-                    vUv=uv;
-                    vId=instId;
-                    vec3 pos = vec3(position);
-                    pos += instPos;
-                    if(vId<=32.){
-                        pos*=(instId*instId*instId*instId)/(sphereNum*sphereNum*sphereNum*sphereNum)+0.18;
-                    }
-                    else
-                        pos*=(instId*instId)/(sphereNum*sphereNum);
-                    pos*=size;
-                    gl_Position = projectionMatrix * modelViewMatrix * vec4(pos,1.0);
-                    ${THREE.ShaderChunk.logdepthbuf_vertex}
+                vec4 modelPosition = modelMatrix * vec4(pos, 1.0);
+                vPos=modelPosition.xyz;
+                vec4 viewPosition = viewMatrix * modelPosition;
+                vec4 projectionPosition = projectionMatrix * viewPosition;
+                gl_Position = projectionPosition;
+
+                vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );
+                bool isPerspective = ( projectionMatrix[ 2 ][ 3 ] == - 1.0 );
+                    if ( isPerspective ) gl_PointSize *= (1.0 / - viewPosition.z);
+
+                ${THREE.ShaderChunk.logdepthbuf_vertex}
                 }
             `,
-            fragmentShader: `
-                ${THREE.ShaderChunk.logdepthbuf_pars_fragment}
-                uniform float uTime;
-                uniform float opacity;
-                uniform float random;
-                uniform float sphereNum;
+            fragmentShader: `\
                 
-                varying vec2 vUv;
-                varying float vId;
+                
+                ${THREE.ShaderChunk.logdepthbuf_pars_fragment}
+                
+                varying vec3 vPos;
+                uniform vec3 uAvatarPos;
+                uniform float opacity;
                 
                 void main() {
-                    if(vId<=52.){
-                        gl_FragColor=vec4(0.3984,0.4921,0.765625,(0.9-((vId*vId)/(sphereNum*sphereNum))));
-                        if(vId>=33.99)
-                            gl_FragColor.a/=10.5;
-                        else{
-                            gl_FragColor.a/=1.2;
-                        }
-                            
-                    }   
-                    else{
-                        gl_FragColor=vec4(0.3984,0.4921,0.765625, 0.003*(vId/sphereNum));
-                        gl_FragColor.a/=50.;
-                    }
-                    if(vId>=23.99){
-                        gl_FragColor.a*=((vId*vId)/(sphereNum*sphereNum))*0.9;
-                    }
-                    if(vId<23.99){
-                        gl_FragColor.a*=0.4*((vId*vId)/(sphereNum*sphereNum));
-                    }
-                    if(vId>=43.99){
-                        gl_FragColor.a*=((vId*vId)/(sphereNum*sphereNum))*0.6;
-                    }
-                    gl_FragColor.a*=opacity;
+                
+                    float distanceToCenter = distance(gl_PointCoord, vec2(0.5));
+                    float light = 0.05 / distanceToCenter - 0.1;
+                    if(opacity<=0.)
+                        gl_FragColor = vec4(0.3984,0.4921,0.765625, light);
+                    else
+                        gl_FragColor = vec4(0.3984,0.3921,0.465625, light);
+                    if(opacity<=0.)
+                        gl_FragColor.a*=1.-(distance(uAvatarPos,vPos)+.5);
+                    gl_FragColor.a-=opacity*0.5*distanceToCenter;
+                    gl_FragColor.xyz-=opacity*.8;
+                
                     ${THREE.ShaderChunk.logdepthbuf_fragment}
-                    
                 }
             `,
             side: THREE.DoubleSide,
             transparent: true,
             depthWrite: false,
             blending: THREE.AdditiveBlending,
-        });
-
-        const mainBall = new THREE.Mesh(instGeom, mainballMaterial);
-        const group = new THREE.Group();
-        group.add(mainBall)
-        app.add(group);
-        const localVector = new THREE.Vector3();
-        useFrame(({timestamp}) => {
-
-            group.rotation.copy(localPlayer.rotation);
-            group.position.copy(localPlayer.position);
-            localPlayer.getWorldDirection(localVector)
-            localVector.normalize();
-            group.position.x-=.1*localVector.x;
-            group.position.z-=.1*localVector.z;
-
             
+        });
+        
+
+        const mainBall = new THREE.Points(particlesGeometry, particlesMaterial);
+        const group = new THREE.Group();
+        group.add(mainBall);
+        app.add(group);
+        app.updateMatrixWorld();
+        
+        
+        useFrame(({timestamp}) => {
+            
+            group.position.copy(localPlayer.position);
+            group.rotation.copy(localPlayer.rotation);
             if (localPlayer.avatar) {
                 group.position.y -= localPlayer.avatar.height;
                 group.position.y += 0.65;
             }
-           
-            if(narutoRunTime==0){
-                mainballMaterial.uniforms.opacity.value/=1.05;
-                mainballMaterial.uniforms.size.value/=1.01;
-            }
-            else if(narutoRunTime==1){
-                mainballMaterial.uniforms.opacity.value=1;
-                mainballMaterial.uniforms.size.value=4.5;
-                
-            }
-            else if(narutoRunTime>1 ){
-                if(mainballMaterial.uniforms.size.value>1){
-                    mainballMaterial.uniforms.size.value/=1.05;
+            if(narutoRunTime>0){
+                if(narutoRunTime===1){
+                    mainBall.material.uniforms.uSize.value=4.5;
                 }
                 else{
-                    mainballMaterial.uniforms.size.value=1;
+                    if(mainBall.material.uniforms.uSize.value>1){
+                        mainBall.material.uniforms.uSize.value/=1.1;
+                    }
+                    else{
+                        mainBall.material.uniforms.uSize.value=1;
+                    }
                 }
-                
+                group.scale.x=1;
+                group.scale.y=1;
+                group.scale.z=1;
+                mainBall.material.uniforms.opacity.value=0;
             }
-            // else if(narutoRunTime>=10){
-            //     electronicball.update(timeDiff, Electronicball.UPDATES.LATE);
-                
-            // }
+            else{
+                group.scale.x-=0.1;
+                group.scale.y-=0.1;
+                group.scale.z-=0.1;
+                mainBall.material.uniforms.opacity.value+=0.02;
+            }
             
-            mainballMaterial.uniforms.uTime.value=timestamp/100000;
-            app.updateMatrixWorld();
-        
+
+           
+            mainBall.material.uniforms.uAvatarPos.value=group.position;
+            group.updateMatrixWorld();
+           
         });
     }
+    
     //##################################### electricity1 ##################################################
     {
         
@@ -1535,7 +1538,7 @@ export default () => {
             }
             else if(narutoRunTime>1 ){
                 if(electricityMaterial.uniforms.size.value>1){
-                    electricityMaterial.uniforms.size.value/=1.05;
+                    electricityMaterial.uniforms.size.value/=1.1;
                 }
                 else{
                     electricityMaterial.uniforms.size.value=1;
@@ -1702,7 +1705,7 @@ export default () => {
             }
             else if(narutoRunTime>1 ){
                 if(electricityMaterial.uniforms.size.value>1){
-                    electricityMaterial.uniforms.size.value/=1.05;
+                    electricityMaterial.uniforms.size.value/=1.1;
                 }
                 else{
                     electricityMaterial.uniforms.size.value=1;
@@ -2149,6 +2152,157 @@ export default () => {
             app.updateMatrixWorld();
         });
     }
+    //##################################### main ball ##################################################
+    // {
+        
+    //     const mainBallGeometry = new THREE.SphereBufferGeometry(1.9, 32,32);
+    //     const instGeom = new THREE.InstancedBufferGeometry().copy(mainBallGeometry);
+
+    //     const num = 60;
+    //     let instPos = []; 
+    //     let instId = []; 
+    //     let instAngle = []; 
+    //     for (let i = 0; i < num; i++) {
+    //         instPos.push(0, 0, 0);
+    //         instId.push(i);
+    //         instAngle.push(0, 0, 0);
+    //     }
+    //     instGeom.setAttribute("instPos", new THREE.InstancedBufferAttribute(new Float32Array(instPos), 3));
+    //     instGeom.setAttribute("instId", new THREE.InstancedBufferAttribute(new Float32Array(instId), 1));
+    //     instGeom.setAttribute("instAngle", new THREE.InstancedBufferAttribute(new Float32Array(instAngle), 3));
+    //     instGeom.instanceCount = num;
+
+
+    //     const mainballMaterial = new THREE.ShaderMaterial({
+    //         uniforms: {
+    //             sphereNum: { value: num },
+    //             uTime: { value: 0 },
+    //             random: { value: 0 },
+    //             opacity: { value: 0 },
+    //             size: { value: 1 }
+    //         },
+    //         vertexShader: `
+    //             ${THREE.ShaderChunk.common}
+    //             ${THREE.ShaderChunk.logdepthbuf_pars_vertex}
+    //             uniform float uTime;
+    //             uniform float size;
+    //             uniform float sphereNum;
+
+    //             attribute vec3 instPos;
+    //             attribute vec3 instAngle;
+    //             attribute float instId;
+            
+    //             varying vec2 vUv;
+    //             varying float vId;
+                
+                
+    //             void main() {
+    //                 vUv=uv;
+    //                 vId=instId;
+    //                 vec3 pos = vec3(position);
+    //                 pos += instPos;
+    //                 if(vId<=32.){
+    //                     pos*=(instId*instId*instId*instId)/(sphereNum*sphereNum*sphereNum*sphereNum)+0.18;
+    //                 }
+    //                 else
+    //                     pos*=(instId*instId)/(sphereNum*sphereNum);
+    //                 pos*=size;
+    //                 gl_Position = projectionMatrix * modelViewMatrix * vec4(pos,1.0);
+    //                 ${THREE.ShaderChunk.logdepthbuf_vertex}
+    //             }
+    //         `,
+    //         fragmentShader: `
+    //             ${THREE.ShaderChunk.logdepthbuf_pars_fragment}
+    //             uniform float uTime;
+    //             uniform float opacity;
+    //             uniform float random;
+    //             uniform float sphereNum;
+                
+    //             varying vec2 vUv;
+    //             varying float vId;
+                
+    //             void main() {
+    //                 if(vId<=52.){
+    //                     gl_FragColor=vec4(0.3984,0.4921,0.765625,(0.9-((vId*vId)/(sphereNum*sphereNum))));
+    //                     if(vId>=33.99)
+    //                         gl_FragColor.a/=10.5;
+    //                     else{
+    //                         gl_FragColor.a/=1.2;
+    //                     }
+                            
+    //                 }   
+    //                 else{
+    //                     gl_FragColor=vec4(0.3984,0.4921,0.765625, 0.003*(vId/sphereNum));
+    //                     gl_FragColor.a/=50.;
+    //                 }
+    //                 if(vId>=23.99){
+    //                     gl_FragColor.a*=((vId*vId)/(sphereNum*sphereNum))*0.9;
+    //                 }
+    //                 if(vId<23.99){
+    //                     gl_FragColor.a*=0.4*((vId*vId)/(sphereNum*sphereNum));
+    //                 }
+    //                 if(vId>=43.99){
+    //                     gl_FragColor.a*=((vId*vId)/(sphereNum*sphereNum))*0.6;
+    //                 }
+    //                 gl_FragColor.a*=opacity;
+    //                 ${THREE.ShaderChunk.logdepthbuf_fragment}
+                    
+    //             }
+    //         `,
+    //         side: THREE.DoubleSide,
+    //         transparent: true,
+    //         depthWrite: false,
+    //         blending: THREE.AdditiveBlending,
+    //     });
+
+    //     const mainBall = new THREE.Mesh(instGeom, mainballMaterial);
+    //     const group = new THREE.Group();
+    //     group.add(mainBall)
+    //     //app.add(group);
+    //     const localVector = new THREE.Vector3();
+    //     useFrame(({timestamp}) => {
+
+    //         group.rotation.copy(localPlayer.rotation);
+    //         group.position.copy(localPlayer.position);
+    //         localPlayer.getWorldDirection(localVector)
+    //         localVector.normalize();
+    //         group.position.x-=.1*localVector.x;
+    //         group.position.z-=.1*localVector.z;
+
+            
+    //         if (localPlayer.avatar) {
+    //             group.position.y -= localPlayer.avatar.height;
+    //             group.position.y += 0.65;
+    //         }
+           
+    //         if(narutoRunTime==0){
+    //             mainballMaterial.uniforms.opacity.value/=1.05;
+    //             mainballMaterial.uniforms.size.value/=1.01;
+    //         }
+    //         else if(narutoRunTime==1){
+    //             mainballMaterial.uniforms.opacity.value=1;
+    //             mainballMaterial.uniforms.size.value=4.5;
+                
+    //         }
+    //         else if(narutoRunTime>1 ){
+    //             if(mainballMaterial.uniforms.size.value>1){
+    //                 mainballMaterial.uniforms.size.value/=1.1;
+    //             }
+    //             else{
+    //                 mainballMaterial.uniforms.size.value=1;
+    //             }
+                
+    //         }
+    //         // else if(narutoRunTime>=10){
+    //         //     electronicball.update(timeDiff, Electronicball.UPDATES.LATE);
+                
+    //         // }
+            
+    //         mainballMaterial.uniforms.uTime.value=timestamp/100000;
+    //         app.updateMatrixWorld();
+        
+    //     });
+    // }
     //########################################## flame ##########################################
     // {
     //     const group = new THREE.Group();
