@@ -1290,8 +1290,7 @@ export default () => {
                 
                 void main() { 
                 gl_PointSize = (1000.)*uSize;
-                if(uCameraFov>1.)
-                    gl_PointSize /= (uCameraFov*1.2);
+                gl_PointSize *= (uCameraFov);
                 vec4 modelPosition = modelMatrix * vec4(position, 1.0);
                 vPos=modelPosition.xyz;
                 vec4 viewPosition = viewMatrix * modelPosition;
@@ -1338,7 +1337,6 @@ export default () => {
         
 
         const mainBall = new THREE.Points(particlesGeometry, particlesMaterial);
-        mainBall.material.sizeAttenuation= false;
         app.add(mainBall);
         app.updateMatrixWorld();
         
@@ -1378,7 +1376,7 @@ export default () => {
 
            
             mainBall.material.uniforms.uAvatarPos.value=mainBall.position;
-            mainBall.material.uniforms.uCameraFov.value=camera.fov/60;
+            mainBall.material.uniforms.uCameraFov.value=Math.pow(60/camera.fov,1.3);
             app.updateMatrixWorld();
            
         });
