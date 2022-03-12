@@ -2270,7 +2270,7 @@ export default () => {
                 dummy.scale.x = .00001;
                 dummy.scale.y = .00001;
                 dummy.scale.z = .00001;
-                dummy.position.x = (Math.random())*0.2;
+                dummy.position.x = (Math.random()-0.5)*0.2;
                 dummy.position.y = -0.2;
                 dummy.position.z = i*0.1;
                 dummy.rotation.x=Math.random()*i;
@@ -2336,7 +2336,7 @@ export default () => {
                     mesh.getMatrixAt(i, matrix);
                     matrix.decompose(dummy.position, dummy.quaternion, dummy.scale);
                     
-                    if (dummy.position.distanceTo(originPoint)>3 /*|| (timestamp-startTimesAttribute.getX(i)>900)*/) {
+                    if (dummy.position.distanceTo(originPoint)>1.5 /*|| (timestamp-startTimesAttribute.getX(i)>900)*/) {
                         startTimesAttribute.setX(i,timestamp);
                         if(particleEmmitCount>maxParticle){
                             lastStopSw=0;
@@ -2359,7 +2359,7 @@ export default () => {
                         }
                         
                         
-                        dummy.position.x = 0;
+                        dummy.position.x = (Math.random()-0.5)*0.2;
                         dummy.position.y = -0.1;
                         dummy.position.z = 0.;
                         
@@ -2372,8 +2372,8 @@ export default () => {
                         
                     }
                     
-                    opacityAttribute.setX(i, opacityAttribute.getX(i)-0.03);
-                    brokenAttribute.setX(i, brokenAttribute.getX(i)+0.035);
+                    opacityAttribute.setX(i, opacityAttribute.getX(i)-0.04);
+                    brokenAttribute.setX(i, brokenAttribute.getX(i)+0.045);
                         
                     dummy.rotation.x+=0.1*(Math.random()-0.5);
                     dummy.rotation.y+=0.1*(Math.random()-0.5);
